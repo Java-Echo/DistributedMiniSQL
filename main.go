@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"miniSQL/src/parser"
+	"miniSQL/src/Interpreter/lexer"
 )
 
 func main() {
 	s := strings.NewReader("creat table tabel_name where key <= 1")
-	l := parser.NewScanner(s)
+	l := lexer.NewScanner(s)
 	for {
 		tok, str := l.Scan()
 		fmt.Print(tok)
