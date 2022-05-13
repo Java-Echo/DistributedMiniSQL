@@ -1,4 +1,4 @@
-package parser
+package lexer
 
 import (
 	"bufio"
@@ -6,32 +6,32 @@ import (
 	"io"
 )
 
-type Token int
+// type Token int
 
 // 词法分析中的初步结果(部分内容可以经过tokenize来形成语义更加明确的token)
 const (
 	// 特殊标记
-	ILLEGAL Token = iota
-	EOF
+	T_ILLEGAL Token = iota
+	T_EOF
 	WS // 空白字符
 	// 常规类型数据
-	IDENT   // ID，此时我们并不区分关键词，而是归类到同一类
-	INTEGER // 整数
-	FLOAT   // 浮点数
-	STRING  // 字符串
+	T_IDENT   // ID，此时我们并不区分关键词，而是归类到同一类
+	T_INTEGER // 整数
+	T_FLOAT   // 浮点数
+	T_STRING  // 字符串
 	// 其他标记
-	ASTERISK          // *
-	COMMA             // ,
-	LEFT_PARENTHESIS  // (
-	RIGHT_PARENTHESIS // )
-	SEMICOLON         // ;
-	EQUAL             // =
-	ANGLE_LEFT        // <
-	ANGLE_LEFT_EQUAL  //<=
-	ANGLE_RIGHT_EQUAL //>=
-	ANGLE_RIGHT       // >
-	NOT_EQUAL         // <> or !=
-	POINT             //  .
+	T_ASTERISK          // *
+	T_COMMA             // ,
+	T_LEFT_PARENTHESIS  // (
+	T_RIGHT_PARENTHESIS // )
+	T_SEMICOLON         // ;
+	T_EQUAL             // =
+	T_ANGLE_LEFT        // <
+	T_ANGLE_LEFT_EQUAL  //<=
+	T_ANGLE_RIGHT_EQUAL //>=
+	T_ANGLE_RIGHT       // >
+	T_NOT_EQUAL         // <> or !=
+	T_POINT             //  .
 )
 
 type State int // 状态机的状态
@@ -77,7 +77,7 @@ func (s *InputScanner) Scan() (tok Token, lit string) {
 	state := STATE_INIT
 	for state != STATE_END {
 		if checkCharType(ch) == ILLEGAL_SYMBOL {
-			return ILLEGAL, string(ch)
+			return T_ILLEGAL, string(ch)
 		}
 		// buf.WriteRune(ch)
 		switch state {
@@ -92,21 +92,21 @@ func (s *InputScanner) Scan() (tok Token, lit string) {
 			case SPECIAL_SYMBOL:
 				switch ch {
 				case eof:
-					return EOF, ""
+					return T_EOF, ""
 				case '.':
-					return POINT, string(ch)
+					return T_POINT, string(ch)
 				case '*':
-					return ASTERISK, string(ch)
+					return T_ASTERISK, string(ch)
 				case ',':
-					return COMMA, string(ch)
+					return T_COMMA, string(ch)
 				case '(':
-					return LEFT_PARENTHESIS, string(ch)
+					return T_LEFT_PARENTHESIS, string(ch)
 				case ')':
-					return RIGHT_PARENTHESIS, string(ch)
+					return T_RIGHT_PARENTHESIS, string(ch)
 				case ';':
-					return SEMICOLON, string(ch)
+					return T_SEMICOLON, string(ch)
 				case '=':
-					return EQUAL, string(ch)
+					return T_EQUAL, string(ch)
 				case '<':
 					buf.WriteRune(ch)
 					state = STATE_ANGLE_LEFT
@@ -116,7 +116,7 @@ func (s *InputScanner) Scan() (tok Token, lit string) {
 				}
 			case SPACE:
 			case UNDERLINE:
-				return ILLEGAL, string(ch)
+				return T_ILLEGAL, string(ch)
 			}
 		case STATE_INTEGER:
 			switch checkCharType(ch) {
@@ -124,14 +124,14 @@ func (s *InputScanner) Scan() (tok Token, lit string) {
 				buf.WriteRune(ch)
 			case CHAR, SPACE, UNDERLINE:
 				s.unread()
-				return INTEGER, buf.String()
+				return T_INTEGER, buf.String()
 			case SPECIAL_SYMBOL:
 				if ch == '.' {
 					buf.WriteRune(ch)
 					state = STATE_POINT
 				} else {
 					s.unread()
-					return INTEGER, buf.String()
+					return T_INTEGER, buf.String()
 				}
 			}
 		case STATE_POINT:
@@ -140,7 +140,7 @@ func (s *InputScanner) Scan() (tok Token, lit string) {
 				buf.WriteRune(ch)
 				state = STATE_FRACTION
 			case CHAR, SPECIAL_SYMBOL, SPACE, UNDERLINE:
-				return ILLEGAL, string(ch)
+				return T_ILLEGAL, string(ch)
 			}
 		case STATE_FRACTION:
 			switch checkCharType(ch) {
@@ -148,7 +148,7 @@ func (s *InputScanner) Scan() (tok Token, lit string) {
 				buf.WriteRune(ch)
 			case CHAR, SPECIAL_SYMBOL, SPACE, UNDERLINE:
 				s.unread()
-				return FLOAT, buf.String()
+				return T_FLOAT, buf.String()
 			}
 		case STATE_IDENT:
 			switch checkCharType(ch) {
@@ -156,47 +156,47 @@ func (s *InputScanner) Scan() (tok Token, lit string) {
 				buf.WriteRune(ch)
 			case SPECIAL_SYMBOL, SPACE:
 				s.unread()
-				return IDENT, buf.String()
+				return T_IDENT, buf.String()
 			}
 		case STATE_ANGLE_LEFT:
 			switch checkCharType(ch) {
 			case NUM, CHAR, SPACE:
 				s.unread()
-				return ANGLE_LEFT, buf.String()
+				return T_ANGLE_LEFT, buf.String()
 			case SPECIAL_SYMBOL:
 				// ch = s.read()
 				if ch == '=' {
-					return ANGLE_LEFT_EQUAL, "<="
+					return T_ANGLE_LEFT_EQUAL, "<="
 				} else if ch == '>' {
-					return NOT_EQUAL, "<>"
+					return T_NOT_EQUAL, "<>"
 				} else {
 					s.unread()
-					return ANGLE_LEFT, buf.String()
+					return T_ANGLE_LEFT, buf.String()
 				}
 			}
 		case STATE_ANGLE_RIGHT:
 			switch checkCharType(ch) {
 			case NUM, CHAR, SPACE:
 				s.unread()
-				return ANGLE_RIGHT, buf.String()
+				return T_ANGLE_RIGHT, buf.String()
 			case SPECIAL_SYMBOL:
 				// ch = s.read()
 				if ch == '=' {
-					return ANGLE_RIGHT_EQUAL, ">="
+					return T_ANGLE_RIGHT_EQUAL, ">="
 				} else {
 					s.unread()
-					return ANGLE_RIGHT, buf.String()
+					return T_ANGLE_RIGHT, buf.String()
 				}
 			}
 		}
 		ch = s.read()
 	}
 
-	return ILLEGAL, string(ch)
+	return T_ILLEGAL, string(ch)
 }
 
 // read reads the next rune from the buffered reader.
-// Returns the rune(0) if an error occurs (or io.EOF is returned).
+// Returns the rune(0) if an error occurs (or io.T_EOF is returned).
 func (s *InputScanner) read() rune {
 	ch, _, err := s.r.ReadRune()
 	if err != nil {
