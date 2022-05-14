@@ -45,7 +45,6 @@ type yySymType struct {
 	setexpr       types.SetExpr
 	setexprlist   []types.SetExpr
 }
-
 const IDENT = 57346
 const IDENT_LEGAL = 57347
 const PRIMARY = 57348
