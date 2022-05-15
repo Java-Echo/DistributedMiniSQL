@@ -3,8 +3,8 @@ package parser
 
 import (
     "strconv"
-    Value	"miniSQL/src/value"
-	"miniSQL/src/types"
+    Value	"miniSQL/src/Interpreter/value"
+	"miniSQL/src/Interpreter/types"
 )
 %}
 

@@ -10,22 +10,6 @@ const (
 	False = false
 )
 
-// //OnDelete is used for on delete behave
-// type OnDelete = int
-
-// const (
-// 	NoAction OnDelete = iota
-// 	Cascade
-// )
-
-// //KeyOrder order for key
-// type KeyOrder = int
-
-// const (
-// 	Asc KeyOrder = iota
-// 	Desc
-// )
-
 //ScalarColumnTypeTag is the type
 type ScalarColumnTypeTag = int
 
@@ -58,6 +42,7 @@ const (
 
 type DStatements interface {
 	GetOperationType() OperationType
+	GetOperationName() string
 }
 
 // DDStatements has parsed statements.
@@ -88,24 +73,7 @@ type ColumnType struct {
 // Key is a table key.
 type Key struct {
 	Name string
-	// KeyOrder KeyOrder
 }
-
-// // Cluster is a Spanner table cluster.
-// type Cluster struct {
-// 	TableName string
-// 	OnDelete  OnDelete
-// }
-
-// // StoringClause is a storing clause info.
-// type StoringClause struct {
-// 	ColumnNames []string
-// }
-
-// // Interleave is a interlive.
-// type Interleave struct {
-// 	TableName string
-// }
 
 // CreateDatabaseStatement is a 'CREATE DATABASE' statement info.
 type CreateDatabaseStatement struct {
@@ -116,6 +84,10 @@ func (c CreateDatabaseStatement) GetOperationType() OperationType {
 	return CreateDatabase
 }
 
+func (c CreateDatabaseStatement) GetOperationName() string {
+	return "CreateDatabase"
+}
+
 // UseDatabaseStatement is a 'Use DATABASE' statement info.
 type UseDatabaseStatement struct {
 	DatabaseId string
@@ -123,6 +95,10 @@ type UseDatabaseStatement struct {
 
 func (c UseDatabaseStatement) GetOperationType() OperationType {
 	return UseDatabase
+}
+
+func (c UseDatabaseStatement) GetOperationName() string {
+	return "UseDatabase"
 }
 
 // CreateTableStatement is a 'CREATE TABLE' statement info.
@@ -135,6 +111,10 @@ type CreateTableStatement struct {
 
 func (c CreateTableStatement) GetOperationType() OperationType {
 	return CreateTable
+}
+
+func (c CreateTableStatement) GetOperationName() string {
+	return "CreateTable"
 }
 
 // CreateIndexStatement is a 'CREATE INDEX' statement info.
@@ -151,6 +131,10 @@ func (c CreateIndexStatement) GetOperationType() OperationType {
 	return CreateIndex
 }
 
+func (c CreateIndexStatement) GetOperationName() string {
+	return "CreateIndex"
+}
+
 // DropDatabaseStatement is a 'DROP TABLE' statement info.
 type DropDatabaseStatement struct {
 	DatabaseId string
@@ -158,6 +142,10 @@ type DropDatabaseStatement struct {
 
 func (c DropDatabaseStatement) GetOperationType() OperationType {
 	return DropDatabase
+}
+
+func (c DropDatabaseStatement) GetOperationName() string {
+	return "DropDatabase"
 }
 
 // DropTableStatement is a 'DROP TABLE' statement info.
@@ -169,6 +157,10 @@ func (c DropTableStatement) GetOperationType() OperationType {
 	return DropTable
 }
 
+func (c DropTableStatement) GetOperationName() string {
+	return "DropTable"
+}
+
 // DropIndexStatement is a 'DROP INDEX' statement info.
 type DropIndexStatement struct {
 	TableName string
@@ -177,6 +169,10 @@ type DropIndexStatement struct {
 
 func (c DropIndexStatement) GetOperationType() OperationType {
 	return DropIndex
+}
+
+func (c DropIndexStatement) GetOperationName() string {
+	return "DropIndex"
 }
 
 // SelectStatement is a 'SELECT' statement info.
@@ -192,12 +188,20 @@ func (s SelectStatement) GetOperationType() OperationType {
 	return Select
 }
 
+func (s SelectStatement) GetOperationName() string {
+	return "Select"
+}
+
 type ExecFileStatement struct {
 	FileName string
 }
 
 func (s ExecFileStatement) GetOperationType() OperationType {
 	return ExecFile
+}
+
+func (s ExecFileStatement) GetOperationName() string {
+	return "ExecFile"
 }
 
 type (
@@ -504,6 +508,10 @@ func (c InsertStament) GetOperationType() OperationType {
 	return Insert
 }
 
+func (c InsertStament) GetOperationName() string {
+	return "Insert"
+}
+
 type UpdateStament struct {
 	TableName string
 	SetExpr   []SetExpr
@@ -514,6 +522,10 @@ func (c UpdateStament) GetOperationType() OperationType {
 	return Update
 }
 
+func (c UpdateStament) GetOperationName() string {
+	return "Update"
+}
+
 type DeleteStatement struct {
 	TableName string
 	Where     *Where //maybe is nil!!!
@@ -521,4 +533,8 @@ type DeleteStatement struct {
 
 func (c DeleteStatement) GetOperationType() OperationType {
 	return Delete
+}
+
+func (c DeleteStatement) GetOperationName() string {
+	return "Delete"
 }

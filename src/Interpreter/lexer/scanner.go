@@ -45,6 +45,7 @@ const (
 	STATE_ANGLE_LEFT
 	STATE_ANGLE_RIGHT
 	STATE_END
+	STATE_STRING
 )
 
 type CharType int // 单个字符的数据类型
@@ -55,7 +56,8 @@ const (
 	SPECIAL_SYMBOL
 	ILLEGAL_SYMBOL
 	SPACE
-	UNDERLINE
+	UNDERLINE // 下划线
+	QUOTATION // 引号
 )
 
 // eof represents a marker rune for the end of the reader.
@@ -117,6 +119,8 @@ func (s *InputScanner) Scan() (tok Token, lit string) {
 			case SPACE:
 			case UNDERLINE:
 				return T_ILLEGAL, string(ch)
+			case QUOTATION:
+				state = STATE_STRING
 			}
 		case STATE_INTEGER:
 			switch checkCharType(ch) {
@@ -188,6 +192,15 @@ func (s *InputScanner) Scan() (tok Token, lit string) {
 					return T_ANGLE_RIGHT, buf.String()
 				}
 			}
+		case STATE_STRING:
+			switch checkCharType(ch) {
+			case CHAR, NUM, SPACE, UNDERLINE:
+				buf.WriteRune(ch)
+			case QUOTATION:
+				return T_STRING, buf.String()
+			case ILLEGAL_SYMBOL, SPECIAL_SYMBOL:
+				return T_ILLEGAL, string(ch)
+			}
 		}
 		ch = s.read()
 	}
@@ -220,6 +233,8 @@ func checkCharType(ch rune) CharType {
 		return SPECIAL_SYMBOL
 	} else if ch == '_' {
 		return UNDERLINE
+	} else if ch == '\'' {
+		return QUOTATION
 	} else {
 		return ILLEGAL_SYMBOL
 	}

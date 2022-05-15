@@ -8,8 +8,8 @@ import __yyfmt__ "fmt"
 //line yacc.y:2
 
 import (
-	"miniSQL/src/types"
-	Value "miniSQL/src/value"
+	"miniSQL/src/Interpreter/types"
+	Value "miniSQL/src/Interpreter/value"
 	"strconv"
 )
 
@@ -45,6 +45,7 @@ type yySymType struct {
 	setexpr       types.SetExpr
 	setexprlist   []types.SetExpr
 }
+
 const IDENT = 57346
 const IDENT_LEGAL = 57347
 const PRIMARY = 57348
