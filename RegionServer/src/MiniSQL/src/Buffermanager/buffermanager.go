@@ -27,7 +27,7 @@ type nameAndPos struct {
 // InitBuffer
 func InitBuffer() {
 	blockBuffer = NewLRUCache()
-	fileNamePos2Int = make(map[nameAndPos]int, InitSize*4)
+	fileNamePos2Int = make(map[nameAndPos]int, InitSize*4) //“文件+文件内块”到buffer的map
 	posNum = 0
 }
 
@@ -53,7 +53,8 @@ func BlockRead(filename string, block_id uint16) (*block, error) {
 	return blockPtr, nil
 }
 
-// GetBlockNumber 返回当前块数 大小为BlockSize 的倍数, 当前文件大小为 BlockSize * BlockNumber
+// GetBlockNumber 返回当前buffer的块数 大小为BlockSize 的倍数, 当前文件大小为 BlockSize * BlockNumber
+// 我的理解：返回文件总共有多少页
 func GetBlockNumber(filename string) (uint16, error) {
 	blockNumLock.Lock()
 	defer blockNumLock.Unlock()
@@ -61,6 +62,7 @@ func GetBlockNumber(filename string) (uint16, error) {
 }
 
 // NewBlock 返回block_id指新的块在文件中的block id
+// 我的理解：为文件加入一个新的块
 func NewBlock(filename string) (uint16, error) {
 	blockNumLock.Lock()
 	defer blockNumLock.Unlock()
@@ -80,8 +82,9 @@ func NewBlock(filename string) (uint16, error) {
 	return block_id, nil
 }
 
+// 我的理解：和上面有个方法差不多，返回的是文件的块的数量
 func findBlockNumber(filename string) (uint16, error) {
-	fileInfo, err := os.Stat(filename)
+	fileInfo, err := os.Stat(filename) // 文件描述符
 	if err != nil {
 		return 0, err
 	}
@@ -91,6 +94,7 @@ func findBlockNumber(filename string) (uint16, error) {
 }
 
 // BlockFlushALL 刷新所有块，使用协程处理
+// 不保证对
 func BlockFlushAll() (bool, error) {
 	blockBuffer.Lock()
 	defer blockBuffer.Unlock()
@@ -125,6 +129,7 @@ func BeginBlockFlush(channel chan struct{}) {
 }
 
 // DeleteOldBlock
+// 我的理解：暴露函数，删除这个文件在这个buffer中所有的块
 func DeleteOldBlock(filename string) error {
 	blockBuffer.Lock()
 	defer blockBuffer.Unlock()
@@ -140,6 +145,7 @@ func DeleteOldBlock(filename string) error {
 }
 
 // 将filename和pos转换为buffer内部的int，如果不存在则创建一个int
+// 我的理解：内部函数，映射
 func Query2Int(pos nameAndPos) int {
 	query2IntLock.Lock()
 	defer query2IntLock.Unlock()
