@@ -1,14 +1,16 @@
 package Buffermanager
 
-import "sync"
-import "os"
-import "fmt"
+import (
+	"fmt"
+	"os"
+	"sync"
+)
 
 const GoFlushNum = 5 // 最多使用5个协程处理flush
 const blockSize = 8192
 
-var blockBuffer *LRUCache
-var connector = "*"
+var blockBuffer *LRUCache // 调度算法插口
+var connector = "*"       // ？？
 
 var fileNamePos2Int map[nameAndPos]int
 
