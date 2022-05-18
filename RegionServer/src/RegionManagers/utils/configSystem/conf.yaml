@@ -1,0 +1,4 @@
+  etcd_ip: 127.0.0.1
+  etcd_port: 2379
+  etcd_region_register_catalog: /server
+  etcd_master_address: /config/masterAddress

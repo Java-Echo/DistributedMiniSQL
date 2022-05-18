@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strconv"
+	config "region/utils/ConfigSystem"
+	mylog "region/utils/LogSystem"
 	"time"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -13,7 +14,7 @@ import (
 // 获取一个etcd的连接
 func Init() *clientv3.Client {
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints:   []string{"127.0.0.1:2379"},
+		Endpoints:   []string{config.Configs.Etcd_ip + ":" + config.Configs.Etcd_port},
 		DialTimeout: 5 * time.Second,
 	})
 	if err != nil {
@@ -26,24 +27,9 @@ func Init() *clientv3.Client {
 //=============服务发现=============
 
 // 向etcd注册自己
-func ServiceRegister(client *clientv3.Client, catalog string) {
+func ServiceRegister(client *clientv3.Client) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-
-	// 得到当前序号
-	// ToDo:这里的catalog理应是在配置文件中的一个内容
-	getResponse, err := client.Get(ctx, catalog, clientv3.WithPrefix())
-	if err != nil {
-		log.Printf("etcd put error,%v\n", err)
-		return
-	}
-
-	newIndex := 1
-	if len(getResponse.Kvs) != 0 {
-		lastName := getResponse.Kvs[len(getResponse.Kvs)-1].Key
-		lastIndex, _ := strconv.Atoi(string(lastName[len(catalog):]))
-		newIndex = lastIndex + 1
-	}
 
 	// 尝试注册一个新的租约
 	// 获取一个租约 有效期为5秒
@@ -53,9 +39,7 @@ func ServiceRegister(client *clientv3.Client, catalog string) {
 		return
 	}
 
-	fmt.Println("当前服务器的地址为：" + GetHostAddress())
-	fmt.Println("获得的租约服务器名为:" + catalog + "/region_server" + strconv.Itoa(newIndex))
-	_, err = client.Put(ctx, catalog+"/region_server"+strconv.Itoa(newIndex), GetHostAddress(), clientv3.WithLease(leaseGrant.ID))
+	_, err = client.Put(ctx, config.Configs.Etcd_region_register_catalog+"/"+GetHostAddress(), "", clientv3.WithLease(leaseGrant.ID))
 	if err != nil {
 		log.Printf("put error %v", err)
 		return
@@ -74,6 +58,9 @@ func ServiceRegister(client *clientv3.Client, catalog string) {
 	}
 
 	for {
+		log := mylog.NewNormalLog("服务器" + GetHostAddress() + "尝试续约")
+		log.LogType = "INFO"
+		log.LogGen(mylog.LogInputChan)
 		<-keepaliveResponseChan
 		// fmt.Println("ttl:", ka.TTL)
 	}
@@ -81,10 +68,10 @@ func ServiceRegister(client *clientv3.Client, catalog string) {
 }
 
 // 获取master的相关信息(返回 ip+port)
-func GetMasterConfig(client *clientv3.Client, key string) string {
+func GetMasterAddress(client *clientv3.Client) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-	getResponse, err := client.Get(ctx, key)
+	getResponse, err := client.Get(ctx, config.Configs.Etcd_master_address)
 	if err != nil {
 		log.Printf("etcd GET error,%v\n", err)
 		return ""
