@@ -1,6 +1,8 @@
 package rpc
 
-import "net/rpc"
+import (
+	"net/rpc"
+)
 
 // 最终暴露给客户端的服务主体
 type ReportServiceClient struct {

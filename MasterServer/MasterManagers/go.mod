@@ -2,6 +2,8 @@ module master
 
 go 1.17
 
+require gopkg.in/yaml.v3 v3.0.0-20220512140231-539c8e751b99
+
 require (
 	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd/v22 v22.3.2 // indirect

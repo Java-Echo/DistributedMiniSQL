@@ -7,13 +7,13 @@ import (
 	"time"
 
 	mylog "master/utils/LogSystem"
-	gloabl "master/utils/global"
+	global "master/utils/global"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 // ToDo:合理安排这张全局的表的位置
-var TableMap = make(map[string]string)
+var RegionMap = make(map[string]string)
 
 // 进行相关的配置
 func Init() *clientv3.Client {
@@ -54,15 +54,15 @@ func RegisterWatcher(client *clientv3.Client, catalog string) {
 			fmt.Printf("Type:%s,Key:%s,Value:%s\n", event.Type, event.Kv.Key, event.Kv.Value)
 			if event.Type == 0 {
 				// 为新加入的节点添加元信息
-				newMeta := gloabl.RegionMeta{}
+				newMeta := global.RegionMeta{}
 				// ToDo:进一步完善相关的信息
-				gloabl.TableMap[string(event.Kv.Key)] = newMeta
+				global.RegionMap[string(event.Kv.Key)] = newMeta
 				// 记录日志
 				log := mylog.NewNormalLog("服务器 " + string(event.Kv.Key) + " 尝试建立连接")
 				log.LogGen(mylog.LogInputChan)
 			} else if event.Type == 1 {
 				// 删除新加入节点的元信息
-				delete(gloabl.TableMap, string(event.Kv.Key))
+				delete(global.RegionMap, string(event.Kv.Key))
 				// 记录日志
 				log := mylog.NewNormalLog("服务器 " + string(event.Kv.Key) + " 失去连接")
 				log.LogGen(mylog.LogInputChan)

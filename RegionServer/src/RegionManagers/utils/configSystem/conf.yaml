@@ -2,3 +2,4 @@
   etcd_port: 2379
   etcd_region_register_catalog: /server
   etcd_master_address: /config/masterAddress
+  rpc_R2R_port: 1234  #region服务器对region服务器暴露的RPC端口

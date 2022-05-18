@@ -3,7 +3,7 @@ package master
 import (
 	"fmt"
 	mylog "master/utils/LogSystem"
-	gloabl "master/utils/global"
+	global "master/utils/global"
 	"testing"
 	"time"
 
@@ -15,7 +15,7 @@ var master *clientv3.Client
 func TestMain(m *testing.M) {
 	master = Init()
 	mylog.LogInputChan = mylog.LogStart()
-	gloabl.TableMap = make(map[string]gloabl.RegionMeta)
+	global.RegionMap = make(map[string]global.RegionMeta)
 	m.Run()
 	fmt.Println("初始化完成")
 }
