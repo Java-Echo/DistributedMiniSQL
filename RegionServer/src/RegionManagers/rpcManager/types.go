@@ -8,6 +8,15 @@ type LocalTable struct {
 	Port string
 }
 
+type ValidTable struct {
+	Name  string
+	Level string //指明是主副本还是(异步)从副本
+}
+
+type ReportTableRes struct {
+	Tables []ValidTable
+}
+
 /*-------------GossipService--------------------*/
 type FetchLogRst struct {
 	TableName string

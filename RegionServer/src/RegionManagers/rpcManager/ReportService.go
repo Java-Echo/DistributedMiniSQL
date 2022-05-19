@@ -33,10 +33,10 @@ func RegisterReportService(svc ReportTableServiceInterface) error {
 // ========以下是真正暴露出来的接口========
 // 接口定义
 type ReportTableServiceInterface = interface {
-	ReportTable(request []LocalTable, reply *string) error
+	ReportTable(request []LocalTable, reply *ReportTableRes) error
 }
 
 // 实现方法1
-func (p *ReportServiceClient) ReportTable(request []LocalTable, reply *string) error {
+func (p *ReportServiceClient) ReportTable(request []LocalTable, reply *ReportTableRes) error {
 	return p.Client.Call(ReportServiceName+".ReportTable", request, reply)
 }

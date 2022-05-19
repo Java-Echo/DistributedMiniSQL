@@ -103,3 +103,5 @@ func GetMaster(client *clientv3.Client, tableName string) string {
 func GetSyncCopys(client *clientv3.Client, tableName string) string {
 	return ""
 }
+
+// 方法：监听本地的主副本的目录，一旦有别的分区服务器加入，则进行一些操作

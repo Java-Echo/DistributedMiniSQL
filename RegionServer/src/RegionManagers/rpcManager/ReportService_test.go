@@ -5,6 +5,7 @@ import (
 	"log"
 	config "region/utils/ConfigSystem"
 	mylog "region/utils/LogSystem"
+	"strconv"
 	"testing"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -25,7 +26,7 @@ func TestReportServiceClient_ReportTable(t *testing.T) {
 		log.Fatal("dialing:", err)
 	}
 
-	var reply string
+	var reply ReportTableRes
 	request := []LocalTable{
 		{"aab", "127.0.0.1", "1234"},
 		{"bbc", "127.0.0.1", "1234"},
@@ -35,6 +36,6 @@ func TestReportServiceClient_ReportTable(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	t.Log(reply)
+	t.Log("返回的数组长度为:" + strconv.Itoa(len(reply.Tables)))
 	t.Error("终止")
 }
