@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	config "region/utils/ConfigSystem"
 	mylog "region/utils/LogSystem"
+	"region/utils/global"
 	"time"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -13,10 +15,14 @@ import (
 
 // 获取一个etcd的连接
 func Init() *clientv3.Client {
+	global.HostIP = GetHostAddress()
 	client, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{config.Configs.Etcd_ip + ":" + config.Configs.Etcd_port},
 		DialTimeout: 5 * time.Second,
 	})
+	log_ := mylog.NewNormalLog("成功连入etcd")
+	log_.LogType = "INFO"
+	log_.LogGen(mylog.LogInputChan)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -39,7 +45,7 @@ func ServiceRegister(client *clientv3.Client) {
 		return
 	}
 
-	_, err = client.Put(ctx, config.Configs.Etcd_region_register_catalog+"/"+GetHostAddress(), "", clientv3.WithLease(leaseGrant.ID))
+	_, err = client.Put(ctx, config.Configs.Etcd_region_register_catalog+"/"+global.HostIP, "", clientv3.WithLease(leaseGrant.ID))
 	if err != nil {
 		log.Printf("put error %v", err)
 		return
@@ -58,7 +64,7 @@ func ServiceRegister(client *clientv3.Client) {
 	}
 
 	for {
-		log := mylog.NewNormalLog("服务器" + GetHostAddress() + "尝试续约")
+		log := mylog.NewNormalLog("服务器" + global.HostIP + "尝试续约")
 		log.LogType = "INFO"
 		log.LogGen(mylog.LogInputChan)
 		<-keepaliveResponseChan
@@ -68,7 +74,7 @@ func ServiceRegister(client *clientv3.Client) {
 }
 
 // 获取master的相关信息(返回 ip+port)
-func GetMasterAddress(client *clientv3.Client) string {
+func GetMasterIP(client *clientv3.Client) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 	getResponse, err := client.Get(ctx, config.Configs.Etcd_master_address)
@@ -85,7 +91,27 @@ func GetMasterAddress(client *clientv3.Client) string {
 
 // 返回自己的IP地址
 func GetHostAddress() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		fmt.Println(err)
+	}
+	for _, address := range addrs {
+		// 检查ip地址判断是否回环地址
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String()
+			}
+		}
+	}
+	fmt.Println("怎么出来了？")
 	return "127.0.0.1"
+}
+
+func GetWatcher(client *clientv3.Client, catalog string) *clientv3.WatchChan {
+	watchChan := client.Watch(context.Background(), catalog, clientv3.WithPrefix())
+	log := mylog.NewNormalLog("开启对目录" + catalog + "的监听")
+	log.LogGen(mylog.LogInputChan)
+	return &watchChan
 }
 
 //=============主从复制=============

@@ -1,5 +1,7 @@
   etcd_ip: 127.0.0.1
   etcd_port: 2379
-  etcd_region_register_catalog: /server
-  etcd_master_address: /config/masterAddress
-  rpc_R2R_port: 1234  #region服务器对region服务器暴露的RPC端口
+  etcd_region_register_catalog: /server #需要完成注册的位置
+  etcd_master_address: /config/masterAddress #Master的地址
+  rpc_m2r_port: 1234  #master服务器对region服务器暴露的RPC端口
+  rpc_r2r_port: 1234  #region服务器对region服务器暴露的RPC端口
+  etcd_table_catalog: /tables #所有的表存放的主目录

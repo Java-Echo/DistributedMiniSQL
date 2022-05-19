@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"fmt"
 	"net/rpc"
 )
 
@@ -16,8 +17,10 @@ var _ ReportTableServiceInterface = (*ReportServiceClient)(nil)
 func DialReportService(network, address string) (*ReportServiceClient, error) {
 	c, err := rpc.Dial(network, address)
 	if err != nil {
+		fmt.Println("DialReportService没找到服务")
 		return nil, err
 	}
+	fmt.Println("成功注册DialReportService")
 	return &ReportServiceClient{Client: c}, nil
 }
 

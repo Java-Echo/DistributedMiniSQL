@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"log"
+	etcd "master/etcdManager"
 	mylog "master/utils/LogSystem"
 	"master/utils/global"
 	"net"
@@ -19,7 +20,7 @@ func StartReportService() {
 		log.Fatal("ListenTCP error:", err)
 	}
 
-	log_ := mylog.NewNormalLog("开启了RPC(ReportService)的监听服务")
+	log_ := mylog.NewNormalLog("开启了RPC(ReportService)的监听服务,监听端口:1234")
 	log_.LogType = "INFO"
 	log_.LogGen(mylog.LogInputChan)
 
@@ -55,6 +56,8 @@ func (p *ReportService) ReportTable(request []LocalTable, reply *ReportTableRes)
 		log := mylog.NewNormalLog("新增一张数据表:" + t.Name)
 		log.LogType = "INFO"
 		log.LogGen(mylog.LogInputChan)
+		// 在etcd上创建该表的目录
+		etcd.CreateMaster(meta)
 		// 在返回值中指明“该表会成为主副本”
 		table := ValidTable{}
 		table.Level = "master"

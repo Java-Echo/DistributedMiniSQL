@@ -7,4 +7,6 @@ type Config struct {
 	Etcd_region_register_catalog string
 	Etcd_master_address          string
 	Rpc_R2R_port                 string
+	Rpc_M2R_port                 string
+	Etcd_table_catalog           string
 }

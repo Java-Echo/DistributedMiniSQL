@@ -23,7 +23,7 @@ func TestMain(m *testing.M) {
 func TestInit(t *testing.T) {
 	cli := Init()
 	// go ServiceRegister(cli, "/server")
-	value := GetMasterAddress(cli)
+	value := GetMasterIP(cli)
 	t.Log("master的IP为:" + value)
 	go ServiceRegister(cli)
 	t.Log("value=" + value)

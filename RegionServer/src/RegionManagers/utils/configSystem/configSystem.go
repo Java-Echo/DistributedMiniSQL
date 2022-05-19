@@ -6,6 +6,8 @@ import (
 	"runtime"
 	"sync"
 
+	mylog "region/utils/LogSystem"
+
 	yaml "gopkg.in/yaml.v3"
 )
 
@@ -27,5 +29,7 @@ func BuildConfig() {
 			panic("decode error")
 		}
 	})
-	println(Configs.Etcd_ip)
+	log := mylog.NewNormalLog("完成了本地的配置读入")
+	log.LogType = "INFO"
+	log.LogGen(mylog.LogInputChan)
 }

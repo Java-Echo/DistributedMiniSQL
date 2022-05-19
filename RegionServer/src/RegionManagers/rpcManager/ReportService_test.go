@@ -28,9 +28,9 @@ func TestReportServiceClient_ReportTable(t *testing.T) {
 
 	var reply ReportTableRes
 	request := []LocalTable{
-		{"aab", "127.0.0.1", "1234"},
-		{"bbc", "127.0.0.1", "1234"},
-		{"cca", "127.0.0.1", "1234"},
+		{"aab", "127.0.0.1", "1234", ""},
+		{"bbc", "127.0.0.1", "1234", ""},
+		{"cca", "127.0.0.1", "1234", ""},
 	}
 	err = client.ReportTable(request, &reply)
 	if err != nil {

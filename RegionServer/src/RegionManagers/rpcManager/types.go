@@ -3,9 +3,10 @@ package rpc
 /*--------------ReportService--------------------*/
 
 type LocalTable struct {
-	Name string
-	IP   string
-	Port string
+	Name  string
+	IP    string
+	Port  string
+	Level string
 }
 
 type ValidTable struct {
