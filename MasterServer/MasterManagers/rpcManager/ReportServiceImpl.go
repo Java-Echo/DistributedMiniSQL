@@ -57,7 +57,7 @@ func (p *ReportService) ReportTable(request []LocalTable, reply *ReportTableRes)
 		log.LogType = "INFO"
 		log.LogGen(mylog.LogInputChan)
 		// 在etcd上创建该表的目录
-		etcd.CreateMaster(meta)
+		etcd.CreateMaster(meta.Name, t.IP, t.Port)
 		// 在返回值中指明“该表会成为主副本”
 		table := ValidTable{}
 		table.Level = "master"

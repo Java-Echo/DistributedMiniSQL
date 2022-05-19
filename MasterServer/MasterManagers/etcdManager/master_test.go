@@ -2,10 +2,10 @@ package master
 
 import (
 	"fmt"
+	config "master/utils/ConfigSystem"
 	mylog "master/utils/LogSystem"
-	global "master/utils/global"
+	"master/utils/global"
 	"testing"
-	"time"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
@@ -13,16 +13,27 @@ import (
 var master *clientv3.Client
 
 func TestMain(m *testing.M) {
-	master = Init()
 	mylog.LogInputChan = mylog.LogStart()
-	global.RegionMap = make(map[string]global.RegionMeta)
-	m.Run()
+	config.BuildConfig()
+	global.Master = Init()
 	fmt.Println("初始化完成")
+	m.Run()
 }
 
-func TestRegisterWatcher(t *testing.T) {
-	// 开启日志功能
-	go RegisterWatcher(master, "/server/")
-	time.Sleep(10 * time.Second)
+// func TestRegisterWatcher(t *testing.T) {
+// 	// 开启日志功能
+// 	go RegisterWatcher(master, "/server/")
+// 	time.Sleep(10 * time.Second)
+// 	t.Error("终止")
+// }
+
+func TestCreateSlave(t *testing.T) {
+	CreateSlave("bbb", "123.456.789.0", "2129")
+
+	t.Error("终止")
+}
+
+func TestCreateSyncCopys(t *testing.T) {
+	CreateSyncSlave("ccc", "987,654,321,0", "1234")
 	t.Error("终止")
 }

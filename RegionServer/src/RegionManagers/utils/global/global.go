@@ -12,7 +12,7 @@ type TableMeta struct {
 	State        string              // 表的状态
 	TableWatcher *clientv3.WatchChan // 监听表在etcd上的目录(只有在等级为master的时候有用)
 	SyncRegion   string              // 同步从副本(只有在等级为master的时候有用)
-	CopyRegions  [10]string          // 异步从副本(只有在等级为master的时候有用)
+	CopyRegions  []string            // 异步从副本(只有在等级为master的时候有用)
 }
 
 //==========region的全局数据结构==========

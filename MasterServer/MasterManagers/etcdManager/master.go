@@ -7,6 +7,7 @@ import (
 	"net"
 	"time"
 
+	config "master/utils/ConfigSystem"
 	mylog "master/utils/LogSystem"
 	"master/utils/global"
 
@@ -96,30 +97,59 @@ func RegisterWatcher(client *clientv3.Client, catalog string) {
 //=============主从复制=============
 
 // 方法：主服务器为一个从副本建立/删除数据表下的注册
-func CreateSlave(table global.TableMeta) error {
+func CreateSlave(tableName string, ip string, port string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	_, err := global.Master.Put(ctx, config.Configs.Etcd_table_catalog+"/"+tableName+"/"+"slave/"+ip, port)
+	if err != nil {
+		log.Fatalln(err)
+		return err
+	}
+	log := mylog.NewNormalLog("将节点" + ip + ":" + port + "加入到了表" + tableName + "的slave副本下")
+	log.LogGen(mylog.LogInputChan)
+
 	return nil
 }
 
-func DeleteSlave(table global.TableMeta) error {
+func DeleteSlave(table global.TableMeta, ip string, port string) error {
 	return nil
 }
 
 // 方法：主服务器为master建立/删除注册
-func CreateMaster(table global.TableMeta) error {
-	// ToDo:设计这里的etcd目录，并且完善这里的操作
-	fmt.Println("主服务器为master建立注册,这个你可还没实现哦")
+func CreateMaster(tableName string, ip string, port string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	_, err := global.Master.Put(ctx, config.Configs.Etcd_table_catalog+"/"+tableName+"/"+"master/"+ip, port)
+	if err != nil {
+		log.Fatalln(err)
+		return err
+	}
+	log := mylog.NewNormalLog("将节点" + ip + ":" + port + "加入到了表" + tableName + "的master副本下")
+	log.LogGen(mylog.LogInputChan)
+
 	return nil
 }
 
-func DeleteMaster(table global.TableMeta) error {
+func DeleteMaster(table global.TableMeta, ip string, port string) error {
+
 	return nil
 }
 
 // 方法：主服务器为syncCopys建立/删除注册
-func CreateSyncCopys(table global.TableMeta) error {
+func CreateSyncSlave(tableName string, ip string, port string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	_, err := global.Master.Put(ctx, config.Configs.Etcd_table_catalog+"/"+tableName+"/"+"sync_slave/"+ip, port)
+	if err != nil {
+		log.Fatalln(err)
+		return err
+	}
+	log := mylog.NewNormalLog("将节点" + ip + ":" + port + "加入到了表" + tableName + "的sync_slave副本下")
+	log.LogGen(mylog.LogInputChan)
+
 	return nil
 }
 
-func DeleteSyncCopys(table global.TableMeta) error {
+func DeleteSyncSlave(table global.TableMeta, ip string, port string) error {
 	return nil
 }

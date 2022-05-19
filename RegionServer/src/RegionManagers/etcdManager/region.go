@@ -8,6 +8,7 @@ import (
 	config "region/utils/ConfigSystem"
 	mylog "region/utils/LogSystem"
 	"region/utils/global"
+	"strings"
 	"time"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -114,20 +115,52 @@ func GetWatcher(client *clientv3.Client, catalog string) *clientv3.WatchChan {
 	return &watchChan
 }
 
+// 工具函数：得到路径的最后一个字段
+func util_getLastKey(path string) string {
+	keys := strings.Split(path, "/")
+	return keys[len(keys)-1]
+}
+
 //=============主从复制=============
 // 方法：分区服务器提交自己的版本号
-func AddVersion(client *clientv3.Client, tableName string, version string) error {
+func AddVersion(tableName string, version string) error {
 	return nil
 }
 
 // 方法：分区服务器获得表的主副本的IP地址+端口号
-func GetMaster(client *clientv3.Client, tableName string) string {
+func GetMaster(tableName string) string {
 	return ""
 }
 
-// 方法：分区服务器获得表的syncCopys的IP地址+端口号
-func GetSyncCopys(client *clientv3.Client, tableName string) string {
+// 方法：分区服务器获得表的syncCopy的IP地址+端口号
+func GetSyncSlave(tableName string) string {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	getResponse, err := global.Region.Get(ctx, config.Configs.Etcd_table_catalog+"/"+tableName+"/sync_slave/", clientv3.WithPrefix())
+	if err != nil {
+		log.Printf("etcd GET error,%v\n", err)
+		return ""
+	}
+	for _, kv := range getResponse.Kvs {
+		return util_getLastKey(string(kv.Key)) + ":" + string(kv.Value)
+	}
 	return ""
+}
+
+// 方法：分区服务器获得表的异步copy的IP地址+端口号
+func GetSlaves(tableName string) []string {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	getResponse, err := global.Region.Get(ctx, config.Configs.Etcd_table_catalog+"/"+tableName+"/slave/", clientv3.WithPrefix())
+	if err != nil {
+		log.Printf("etcd GET error,%v\n", err)
+		return nil
+	}
+	var res []string
+	for _, kv := range getResponse.Kvs {
+		res = append(res, util_getLastKey(string(kv.Key))+":"+string(kv.Value))
+	}
+	return res
 }
 
 // 方法：监听本地的主副本的目录，一旦有别的分区服务器加入，则进行一些操作
