@@ -73,7 +73,7 @@ func SendNewTables(tableRoot string) {
 		table := rpc.LocalTable{}
 		table.Name = file
 		table.IP = global.HostIP
-		table.Port = "这个应该是哪个端口？"
+		table.Port = config.Configs.Rpc_R2R_port
 		table.Level = "master"
 		request = append(request, table)
 	}
@@ -81,7 +81,7 @@ func SendNewTables(tableRoot string) {
 		table := rpc.LocalTable{}
 		table.Name = file
 		table.IP = global.HostIP
-		table.Port = "这个应该是哪个端口？"
+		table.Port = config.Configs.Rpc_R2R_port
 		table.Level = "slave"
 		request = append(request, table)
 	}
@@ -100,7 +100,7 @@ func SendNewTables(tableRoot string) {
 			catalog := config.Configs.Etcd_table_catalog + "/" + table.Name + "/"
 			meta.TableWatcher = etcd.GetWatcher(global.Region, catalog)
 			// ToDo:完善对于主副本建立监听机制
-			StartWatchTable(meta)
+			go StartWatchTable(meta)
 			// ToDo:第一次遍历这个目录检查从副本数量，一旦数量不够，就向master索取
 			syncNeed, slaveNeed := CheckSlave(meta)
 			GetSlave(syncNeed, slaveNeed)

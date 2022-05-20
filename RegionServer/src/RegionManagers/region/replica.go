@@ -28,7 +28,7 @@ func CheckSlave(table global.TableMeta) (int, int) {
 	return res_sync, res_slave
 }
 
-// 向master寻求slave
+// ToDo:向master寻求slave
 func GetSlave(syncNeed int, slaveNeed int) {
 
 }
