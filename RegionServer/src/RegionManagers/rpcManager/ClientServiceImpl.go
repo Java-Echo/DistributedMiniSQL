@@ -47,5 +47,7 @@ func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
 	fmt.Println("接受到的SQL语句为:" + request.SQL)
 	fmt.Println("SQL语句具体要作用的表为:" + request.Table)
 	fmt.Println("接受到的SQL语句的类型为:" + request.SQLtype)
+	reply.Result = "什么都没有查到哦"
+	reply.State = "成功"
 	return nil
 }

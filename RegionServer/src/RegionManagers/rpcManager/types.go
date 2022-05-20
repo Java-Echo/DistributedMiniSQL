@@ -46,6 +46,6 @@ type SQLRst struct {
 }
 
 type SQLRes struct {
-	state  string // 查询结果的状态(成功、失败等)
-	result string // 最终SQL的返回结果
+	State  string // 查询结果的状态(成功、失败等)
+	Result string // 最终SQL的返回结果
 }

@@ -50,5 +50,5 @@ func (p *CliServiceClient) Hello(request string, reply *string) error {
 
 // 方法：SQL的执行
 func (p *CliServiceClient) SQL(request SQLRst, reply *SQLRes) error {
-	return p.Client.Call(ServiceName+".Hello", request, reply)
+	return p.Client.Call(ServiceName+".SQL", request, reply)
 }

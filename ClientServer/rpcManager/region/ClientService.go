@@ -40,7 +40,7 @@ func RegisterCliService(svc CliServiceInterface) error {
 // 接口定义
 type CliServiceInterface = interface {
 	Hello(request string, reply *string) error
-	// SQL(request SQLRst, reply *SQLRes) error
+	SQL(request SQLRst, reply *SQLRes) error
 }
 
 // 实现方法1
@@ -48,7 +48,7 @@ func (p *CliServiceClient) Hello(request string, reply *string) error {
 	return p.Client.Call(ServiceName+".Hello", request, reply)
 }
 
-// // 方法：SQL的执行
-// func (p *CliServiceClient) SQL(request SQLRst, reply *SQLRes) error {
-// 	return p.Client.Call(ServiceName+".Hello", request, reply)
-// }
+// 方法：SQL的执行
+func (p *CliServiceClient) SQL(request SQLRst, reply *SQLRes) error {
+	return p.Client.Call(ServiceName+".SQL", request, reply)
+}
