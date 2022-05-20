@@ -28,7 +28,9 @@ func StartCliService(port string) {
 		if err != nil {
 			log.Fatal("Accept error:", err)
 		}
-
+		log_ = mylog.NewNormalLog("RPC服务(CliService)被调用")
+		log_.LogType = "INFO"
+		log_.LogGen(mylog.LogInputChan)
 		go rpc.ServeConn(conn)
 	}
 }
