@@ -31,17 +31,11 @@ func RegisterGossipService(svc GossipServiceInterface) error {
 // ========以下是真正暴露出来的接口========
 // 接口定义
 type GossipServiceInterface = interface {
-	FetchLog(request FetchLogRst, reply *FetchLogRes) error    // 其他region服务器来询问特定表最新的log
-	SyncProbe(request SyncProbeRst, reply *SyncProbeRes) error // 其他region服务器来询问是否完成了特定表特定版本的同步
+	PassLog(request PassLogRst, reply *PassLogRes) error
 	// ToDo:可以定义更多的函数
 }
 
 // 实现方法1
-func (p *GossipServiceClient) FetchLog(request FetchLogRst, reply *FetchLogRes) error {
-	return p.Client.Call(GossipServiceName+".FetchLog", request, reply)
-}
-
-// 实现方法2
-func (p *GossipServiceClient) SyncProbe(request SyncProbeRst, reply *SyncProbeRes) error {
-	return p.Client.Call(GossipServiceName+".SyncProbe", request, reply)
+func (p *GossipServiceClient) PassLog(request PassLogRst, reply *PassLogRes) error {
+	return p.Client.Call(GossipServiceName+".PassLog", request, reply)
 }

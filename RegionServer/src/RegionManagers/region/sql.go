@@ -1,16 +1,19 @@
 package regionWorker
 
+/*--------------master节点的操作--------------*/
 // ToDo:查询语句
-func SQL_select(SQL string) (string, bool) {
+func MasterSQLSelect(SQL string) (string, bool) {
 	return "", true
 }
 
 // ToDo:对部分表项的修改
-func SQL_change(SQL string) bool {
+func MasterSQLChange(SQL string) bool {
 	return true
 }
 
 // ToDo:对数据表的增加或者删除
-func SQL_tableChange(SQL string) bool {
+func MasterSQLTableChange(SQL string) bool {
 	return true
 }
+
+/*--------------常规的SQL操作--------------*/

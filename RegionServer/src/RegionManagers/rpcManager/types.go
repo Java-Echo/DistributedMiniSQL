@@ -29,23 +29,13 @@ type AskSlaveRes struct {
 }
 
 /*-------------GossipService--------------------*/
-type FetchLogRst struct {
-	TableName string
-	Version   string // 本地的版本号
+type PassLogRst struct {
+	SQLtype string // SQL语句的类型
+	Table   string // SQL语句具体查询的表
+	SQL     string // 具体的SQL语句
 }
 
-type FetchLogRes struct {
-	TableName string
-	Version   string
-	Log       []string
-}
-
-type SyncProbeRst struct {
-	TableName string
-	Version   string
-}
-
-type SyncProbeRes struct {
+type PassLogRes struct {
 }
 
 /*-------------CliService--------------------*/
@@ -59,3 +49,6 @@ type SQLRes struct {
 	State  string // 查询结果的状态(成功、失败等)
 	Result string // 最终SQL的返回结果
 }
+
+/*------------全局变量-------------*/
+var RpcM2R *ReportServiceClient // 与master通信的rpc服务

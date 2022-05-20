@@ -105,7 +105,7 @@ func SendNewTables(tableRoot string) {
 		table.Level = "slave"
 		request = append(request, table)
 	}
-	err := global.RpcM2R.ReportTable(request, &reply)
+	err := rpc.RpcM2R.ReportTable(request, &reply)
 	if err != nil {
 		log.Fatal(err)
 	}
