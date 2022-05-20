@@ -6,7 +6,7 @@ import (
 )
 
 func TestCliService_Hello(t *testing.T) {
-	go StartCliService("1234")
+	go StartCliService("5000")
 	// 延迟100秒，可别让它停下来了！
-	time.Sleep(100 * time.Second)
+	time.Sleep(30 * time.Second)
 }

@@ -28,12 +28,12 @@ func TestMain(m *testing.M) {
 // }
 
 func TestCreateSlave(t *testing.T) {
-	CreateSlave("bbb", "123.456.789.0", "2129")
+	CreateSlave("bbb", "123.456.789.0")
 
 	t.Error("终止")
 }
 
 func TestCreateSyncCopys(t *testing.T) {
-	CreateSyncSlave("ccc", "987,654,321,0", "1234")
+	CreateSyncSlave("ccc", "987,654,321,0")
 	t.Error("终止")
 }

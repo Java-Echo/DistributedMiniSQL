@@ -97,54 +97,54 @@ func RegisterWatcher(client *clientv3.Client, catalog string) {
 //=============主从复制=============
 
 // 方法：主服务器为一个从副本建立/删除数据表下的注册
-func CreateSlave(tableName string, ip string, port string) error {
+func CreateSlave(tableName string, ip string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-	_, err := global.Master.Put(ctx, config.Configs.Etcd_table_catalog+"/"+tableName+"/"+"slave/"+ip, port)
+	_, err := global.Master.Put(ctx, config.Configs.Etcd_table_catalog+"/"+tableName+"/"+"slave/"+ip, "")
 	if err != nil {
 		log.Fatalln(err)
 		return err
 	}
-	log := mylog.NewNormalLog("将节点" + ip + ":" + port + "加入到了表" + tableName + "的slave副本下")
+	log := mylog.NewNormalLog("将节点" + ip + "加入到了表" + tableName + "的slave副本下")
 	log.LogGen(mylog.LogInputChan)
 
 	return nil
 }
 
-func DeleteSlave(table global.TableMeta, ip string, port string) error {
+func DeleteSlave(table global.TableMeta, ip string) error {
 	return nil
 }
 
 // 方法：主服务器为master建立/删除注册
-func CreateMaster(tableName string, ip string, port string) error {
+func CreateMaster(tableName string, ip string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-	_, err := global.Master.Put(ctx, config.Configs.Etcd_table_catalog+"/"+tableName+"/"+"master/"+ip, port)
+	_, err := global.Master.Put(ctx, config.Configs.Etcd_table_catalog+"/"+tableName+"/"+"master/"+ip, "")
 	if err != nil {
 		log.Fatalln(err)
 		return err
 	}
-	log := mylog.NewNormalLog("将节点" + ip + ":" + port + "加入到了表" + tableName + "的master副本下")
+	log := mylog.NewNormalLog("将节点" + ip + "加入到了表" + tableName + "的master副本下")
 	log.LogGen(mylog.LogInputChan)
 
 	return nil
 }
 
-func DeleteMaster(table global.TableMeta, ip string, port string) error {
+func DeleteMaster(table global.TableMeta, ip string) error {
 
 	return nil
 }
 
 // 方法：主服务器为syncCopys建立/删除注册
-func CreateSyncSlave(tableName string, ip string, port string) error {
+func CreateSyncSlave(tableName string, ip string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-	_, err := global.Master.Put(ctx, config.Configs.Etcd_table_catalog+"/"+tableName+"/"+"sync_slave/"+ip, port)
+	_, err := global.Master.Put(ctx, config.Configs.Etcd_table_catalog+"/"+tableName+"/"+"sync_slave/"+ip, "")
 	if err != nil {
 		log.Fatalln(err)
 		return err
 	}
-	log := mylog.NewNormalLog("将节点" + ip + ":" + port + "加入到了表" + tableName + "的sync_slave副本下")
+	log := mylog.NewNormalLog("将节点" + ip + "加入到了表" + tableName + "的sync_slave副本下")
 	log.LogGen(mylog.LogInputChan)
 
 	return nil

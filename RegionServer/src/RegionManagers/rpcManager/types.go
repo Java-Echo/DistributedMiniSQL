@@ -18,6 +18,16 @@ type ReportTableRes struct {
 	Tables []ValidTable
 }
 
+type AskSlaveRst struct {
+	TableName    string // 表的名称
+	SyncSlaveNum int    // 同步从副本的数量
+	SlaveNum     int    // 异步从副本的数量
+}
+
+type AskSlaveRes struct {
+	State string // 执行状态(成功/失败)
+}
+
 /*-------------GossipService--------------------*/
 type FetchLogRst struct {
 	TableName string

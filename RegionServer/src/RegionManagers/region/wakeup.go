@@ -1,6 +1,7 @@
 package regionWorker
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -8,7 +9,10 @@ import (
 	etcd "region/etcdManager"
 	rpc "region/rpcManager"
 	config "region/utils/ConfigSystem"
+	mylog "region/utils/LogSystem"
 	"region/utils/global"
+
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 // 在本地的主副本文件夹下面查找所有的表名
@@ -55,8 +59,25 @@ func findSlaveCopy(tableRoot string) []string {
 }
 
 // ToDo:监听主副本在etcd上的目录的信息，根据这个目录的不同变化来做出不同的反应
-func StartWatchTable(table global.TableMeta) {
-	fmt.Println("开始监听这个表")
+func StartWatchTable(table *global.TableMeta) {
+	catalog := config.Configs.Etcd_table_catalog + "/" + table.Name + "/"
+	fmt.Println("监听的目录为:" + catalog)
+	watchChan := global.Region.Watch(context.Background(), catalog, clientv3.WithPrefix())
+	table.TableWatcher = &watchChan
+	log := mylog.NewNormalLog("开启对表'" + table.Name + "'目录的监听")
+	log.LogGen(mylog.LogInputChan)
+
+	for watchResponse := range watchChan {
+		for _, event := range watchResponse.Events {
+			if event.Type == 0 {
+				// ToDo:此时有节点失去了
+				// 将节点从本地删去
+			} else if event.Type == 1 {
+				// ToDo:此时有节点新加入了
+				// 首先将其加入异步从副本，然后向其传输日志文件快照
+			}
+		}
+	}
 }
 
 // 完成分区服务器新建和重启的相关任务
@@ -99,13 +120,12 @@ func SendNewTables(tableRoot string) {
 			catalog := config.Configs.Etcd_table_catalog + "/" + table.Name + "/"
 			meta.TableWatcher = etcd.GetWatcher(global.Region, catalog)
 			// ToDo:完善对于主副本建立监听机制
-			go StartWatchTable(meta)
+			go StartWatchTable(&meta)
 			// ToDo:第一次遍历这个目录检查从副本数量，一旦数量不够，就向master索取
 			syncNeed, slaveNeed := CheckSlave(meta)
-			GetSlave(syncNeed, slaveNeed)
+			GetSlave(meta.Name, syncNeed, slaveNeed)
 		} else if table.Level == "slave" {
 
 		}
 	}
-
 }

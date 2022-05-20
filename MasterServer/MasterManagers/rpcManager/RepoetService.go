@@ -32,9 +32,15 @@ func RegisterReportService(svc ReportTableServiceInterface) error {
 // 接口定义
 type ReportTableServiceInterface = interface {
 	ReportTable(request []LocalTable, reply *ReportTableRes) error
+	AskSlave(request AskSlaveRst, reply *AskSlaveRes) error
 }
 
-// 实现方法1
+// 上报本地的表格
 func (p *ReportServiceClient) ReportTable(request []LocalTable, reply *ReportTableRes) error {
 	return p.Client.Call(ReportServiceName+".ReportTable", request, reply)
+}
+
+// 寻求对应表的从副本
+func (p *ReportServiceClient) AskSlave(request AskSlaveRst, reply *AskSlaveRes) error {
+	return p.Client.Call(ReportServiceName+".AskSlave", request, reply)
 }

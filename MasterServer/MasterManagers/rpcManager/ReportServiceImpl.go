@@ -57,7 +57,7 @@ func (p *ReportService) ReportTable(request []LocalTable, reply *ReportTableRes)
 		log.LogType = "INFO"
 		log.LogGen(mylog.LogInputChan)
 		// 在etcd上创建该表的目录
-		etcd.CreateMaster(meta.Name, t.IP, t.Port)
+		etcd.CreateMaster(meta.Name, t.IP)
 		// 在返回值中指明“该表会成为主副本”
 		table := ValidTable{}
 		table.Level = "master"
@@ -65,6 +65,31 @@ func (p *ReportService) ReportTable(request []LocalTable, reply *ReportTableRes)
 		reply.Tables = append(reply.Tables, table)
 	}
 	return nil
+}
+
+// ToDo:设立合适的选择region的逻辑，然后及时将这个region添加到etcd上面
+// ToDo:尚未完成节点筛选逻辑的实现
+func (p *ReportService) AskSlave(request AskSlaveRst, reply *AskSlaveRes) error {
+	source := []string{request.TableName}
+	newSyncSlave := selectRegion(request.SyncSlaveNum, source)
+	source = append(source, newSyncSlave...)
+	newSlave := selectRegion(request.SlaveNum, source)
+	// 在etcd上注册
+	for _, s := range newSyncSlave {
+		etcd.CreateSyncSlave(request.TableName, s)
+	}
+	for _, s := range newSlave {
+		etcd.CreateSlave(request.TableName, s)
+	}
+
+	reply.State = "成功！"
+	return nil
+}
+
+// ToDo:从除了source之外的region中选出n个合适的
+func selectRegion(n int, source []string) []string {
+	res := make([]string, 0)
+	return res
 }
 
 // ToDo:完成更多的用于接受分区服务器报告的RPC调用

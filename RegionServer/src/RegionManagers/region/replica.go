@@ -1,7 +1,9 @@
 package regionWorker
 
 import (
+	"fmt"
 	etcd "region/etcdManager"
+	rpc "region/rpcManager"
 	"region/utils/global"
 )
 
@@ -29,6 +31,13 @@ func CheckSlave(table global.TableMeta) (int, int) {
 }
 
 // ToDo:向master寻求slave
-func GetSlave(syncNeed int, slaveNeed int) {
-
+func GetSlave(tableName string, syncNeed int, slaveNeed int) {
+	request := rpc.AskSlaveRst{
+		TableName:    tableName,
+		SyncSlaveNum: syncNeed,
+		SlaveNum:     slaveNeed,
+	}
+	var reply rpc.AskSlaveRes
+	global.RpcM2R.AskSlave(request, &reply)
+	fmt.Println("GetSlave的返回值为:" + reply.State)
 }

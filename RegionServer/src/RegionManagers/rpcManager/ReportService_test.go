@@ -21,7 +21,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestReportServiceClient_ReportTable(t *testing.T) {
-	client, err := DialReportService("tcp", "localhost:1234")
+	client, err := DialReportService("tcp", "localhost:"+config.Configs.Rpc_M2R_port)
 	if err != nil {
 		log.Fatal("dialing:", err)
 	}
@@ -37,5 +37,24 @@ func TestReportServiceClient_ReportTable(t *testing.T) {
 		log.Fatal(err)
 	}
 	t.Log("返回的数组长度为:" + strconv.Itoa(len(reply.Tables)))
+	t.Error("终止")
+}
+
+func TestReportServiceClient_AskSlave(t *testing.T) {
+	client, err := DialReportService("tcp", "localhost:"+config.Configs.Rpc_M2R_port)
+	if err != nil {
+		log.Fatal("dialing:", err)
+	}
+
+	var request AskSlaveRst
+	var reply AskSlaveRes
+	request.TableName = "aaa"
+	request.SyncSlaveNum = 1
+	request.SlaveNum = 1
+	err = client.AskSlave(request, &reply)
+	if err != nil {
+		log.Fatal(err)
+	}
+	t.Log("请求的状态为:" + reply.State)
 	t.Error("终止")
 }
