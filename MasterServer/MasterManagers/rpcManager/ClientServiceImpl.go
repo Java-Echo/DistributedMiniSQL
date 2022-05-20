@@ -39,3 +39,12 @@ func (p *CliService) Hello(request string, reply *string) error {
 	*reply = "你好"
 	return nil
 }
+
+func (p *CliService) FetchTable(request string, reply *TableInfo) error {
+	// ToDo:尝试查表，并将相关的信息添加到TableInfo中
+	reply.Master = Region{"master的IP地址"}
+	reply.Sync_slave = Region{"sync_slave的IP地址"}
+	reply.Slaves = append(reply.Slaves, Region{"第一个异步从节点的IP地址"})
+	reply.Slaves = append(reply.Slaves, Region{"第二个异步从节点的IP地址"})
+	return nil
+}

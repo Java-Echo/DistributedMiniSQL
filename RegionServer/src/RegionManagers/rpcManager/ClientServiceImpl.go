@@ -47,6 +47,16 @@ func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
 	fmt.Println("接受到的SQL语句为:" + request.SQL)
 	fmt.Println("SQL语句具体要作用的表为:" + request.Table)
 	fmt.Println("接受到的SQL语句的类型为:" + request.SQLtype)
+	switch request.SQLtype {
+	case "select":
+		fmt.Println("单纯的查询操作")
+	case "delete", "insert", "update":
+		fmt.Println("对数据表的局部改动操作")
+	case "create_table", "delete_table":
+		fmt.Println("这个操作不得了，要对数据表整体改动")
+	default:
+		fmt.Println("什么b操作?")
+	}
 	reply.Result = "什么都没有查到哦"
 	reply.State = "成功"
 	return nil

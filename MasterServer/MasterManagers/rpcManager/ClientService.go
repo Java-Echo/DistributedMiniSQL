@@ -40,9 +40,15 @@ func RegisterCliService(svc CliServiceInterface) error {
 // 接口定义
 type CliServiceInterface = interface {
 	Hello(request string, reply *string) error
+	FetchTable(request string, reply *TableInfo) error
 }
 
 // 实现方法1
 func (p *CliServiceClient) Hello(request string, reply *string) error {
 	return p.Client.Call(ServiceName+".Hello", request, reply)
+}
+
+// Client前来获得某张表的信息
+func (p *CliServiceClient) FetchTable(request string, reply *TableInfo) error {
+	return p.Client.Call(ServiceName+".FetchTable", request, reply)
 }
