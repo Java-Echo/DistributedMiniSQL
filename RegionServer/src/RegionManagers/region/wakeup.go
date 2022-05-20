@@ -9,7 +9,6 @@ import (
 	rpc "region/rpcManager"
 	config "region/utils/ConfigSystem"
 	"region/utils/global"
-	"strconv"
 )
 
 // 在本地的主副本文件夹下面查找所有的表名
@@ -90,7 +89,7 @@ func SendNewTables(tableRoot string) {
 		log.Fatal(err)
 	}
 	// ToDo:对rpc的返回值进行处理，建立本地的数据表
-	fmt.Println("本次返回的数组长度为:" + strconv.Itoa(len(reply.Tables)))
+	// fmt.Println("本次返回的数组长度为:" + strconv.Itoa(len(reply.Tables)))
 	for _, table := range reply.Tables {
 		meta := global.TableMeta{}
 		meta.Level = table.Level

@@ -3,6 +3,7 @@ package rpc
 import (
 	"fmt"
 	"net/rpc"
+	mylog "region/utils/LogSystem"
 )
 
 // 最终暴露给客户端的服务主体
@@ -20,7 +21,9 @@ func DialReportService(network, address string) (*ReportServiceClient, error) {
 		fmt.Println("DialReportService没找到服务")
 		return nil, err
 	}
-	fmt.Println("成功注册DialReportService")
+	log_ := mylog.NewNormalLog("成功注册RPC服务(DialReportService)")
+	log_.LogType = "INFO"
+	log_.LogGen(mylog.LogInputChan)
 	return &ReportServiceClient{Client: c}, nil
 }
 

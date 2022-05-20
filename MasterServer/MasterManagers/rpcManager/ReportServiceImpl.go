@@ -3,7 +3,6 @@ package rpc
 import (
 	"log"
 	etcd "master/etcdManager"
-	config "master/utils/ConfigSystem"
 	mylog "master/utils/LogSystem"
 	"master/utils/global"
 	"net"
@@ -13,15 +12,15 @@ import (
 type ReportService struct{}
 
 // 开启这个服务
-func StartReportService() {
+func StartReportService(port string) {
 	RegisterReportService(new(ReportService))
 
-	listener, err := net.Listen("tcp", ":"+config.Configs.Rpc_m2r_port)
+	listener, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Fatal("ListenTCP error:", err)
 	}
 
-	log_ := mylog.NewNormalLog("开启了RPC(ReportService)的监听服务,监听端口:" + config.Configs.Rpc_m2r_port)
+	log_ := mylog.NewNormalLog("开启了RPC(ReportService)的监听服务,监听端口:" + port)
 	log_.LogType = "INFO"
 	log_.LogGen(mylog.LogInputChan)
 

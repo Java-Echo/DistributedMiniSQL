@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"net/rpc"
+	mylog "region/utils/LogSystem"
 )
 
 type GossipService struct{}
@@ -17,6 +18,10 @@ func StartGossipService(port string) {
 	if err != nil {
 		log.Fatal("ListenTCP error:", err)
 	}
+
+	log_ := mylog.NewNormalLog("开启了RPC(GossipService)的监听服务,监听端口:" + port)
+	log_.LogType = "INFO"
+	log_.LogGen(mylog.LogInputChan)
 
 	for {
 		conn, err := listener.Accept()

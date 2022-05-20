@@ -1,11 +1,10 @@
 package rpc
 
 import (
-	"fmt"
 	"log"
+	mylog "master/utils/LogSystem"
 	"net"
 	"net/rpc"
-	mylog "region/utils/LogSystem"
 )
 
 type CliService struct{}
@@ -38,12 +37,5 @@ func StartCliService(port string) {
 // ToDo:更改处理逻辑
 func (p *CliService) Hello(request string, reply *string) error {
 	*reply = "你好"
-	return nil
-}
-
-func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
-	fmt.Println("接受到的SQL语句为:" + request.SQL)
-	fmt.Println("SQL语句具体要作用的表为:" + request.Table)
-	fmt.Println("接受到的SQL语句的类型为:" + request.SQLtype)
 	return nil
 }

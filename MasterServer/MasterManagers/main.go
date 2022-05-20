@@ -12,9 +12,11 @@ func main() {
 	mylog.LogInputChan = mylog.LogStart()
 	config.BuildConfig()
 	global.Master = etcd.Init()
-	go rpc.StartReportService()
 	global.RegionMap = make(map[string]global.RegionMeta)
 	global.TableMap = make(map[string]global.TableMeta)
+	// 发布rpc服务
+	go rpc.StartReportService(config.Configs.Rpc_m2r_port)
+	go rpc.StartCliService(config.Configs.Rpc_m2c_port)
 	go etcd.RegisterWatcher(global.Master, config.Configs.Etcd_region_register_catalog)
 	for {
 

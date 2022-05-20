@@ -1,3 +1,4 @@
   etcd_region_register_catalog: /server
   etcd_table_catalog: /tables #所有的表存放的主目录
   rpc_m2r_port: 1236  #master服务器对region服务器暴露的RPC端口
+  rpc_m2c_port: 1238  #master服务器对client暴露的RPC端口

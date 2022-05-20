@@ -84,9 +84,9 @@ func GetMasterIP(client *clientv3.Client) string {
 		return ""
 	}
 
-	for _, kv := range getResponse.Kvs {
-		fmt.Printf("%s=%s\n", kv.Key, kv.Value)
-	}
+	// for _, kv := range getResponse.Kvs {
+	// 	fmt.Printf("%s=%s\n", kv.Key, kv.Value)
+	// }
 	return string(getResponse.Kvs[0].Value)
 }
 
