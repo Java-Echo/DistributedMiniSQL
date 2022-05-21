@@ -38,6 +38,14 @@ type PassLogRst struct {
 type PassLogRes struct {
 }
 
+type PassTableRst struct {
+	// ToDo:最好添加一下表的元信息，同时也告知一下它是什么从副本
+	content []byte
+}
+
+type PassTableRes struct {
+}
+
 /*-------------CliService--------------------*/
 type SQLRst struct {
 	SQLtype string // SQL语句的类型

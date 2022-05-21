@@ -43,3 +43,12 @@ func (p *GossipService) PassLog(request PassLogRst, reply *PassLogRes) error {
 	}
 	return nil
 }
+
+func (p *GossipService) PassTable(request PassTableRst, reply *PassTableRes) error {
+	// 首先接受整个表文件
+
+	// 根据表的元信息进行相关的本地信息表的维护
+
+	// 要不要开启一些channel之类的？
+	return nil
+}
