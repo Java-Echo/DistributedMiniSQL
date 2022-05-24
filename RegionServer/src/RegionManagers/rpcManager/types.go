@@ -40,7 +40,8 @@ type PassLogRes struct {
 
 type PassTableRst struct {
 	// ToDo:最好添加一下表的元信息，同时也告知一下它是什么从副本
-	content []byte
+	TableName string
+	Content   []byte
 }
 
 type PassTableRes struct {

@@ -1,9 +1,11 @@
 package rpc
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"net/rpc"
+	"os"
 	mylog "region/utils/LogSystem"
 	"region/utils/global"
 )
@@ -41,11 +43,27 @@ func (p *GossipService) PassLog(request PassLogRst, reply *PassLogRes) error {
 		Table:   request.Table,
 		SQL:     request.SQL,
 	}
+	log_ := mylog.NewNormalLog("接受到来自表" + request.Table + "的同步日志")
+	log_.LogType = "INFO"
+	log_.LogGen(mylog.LogInputChan)
 	return nil
 }
 
 func (p *GossipService) PassTable(request PassTableRst, reply *PassTableRes) error {
 	// 首先接受整个表文件
+	tableName := request.TableName
+	file, err := os.Create(tableName)
+	if err != nil {
+		log.Fatal("创建文件失败")
+	}
+	defer func() {
+		file.Close()
+		fmt.Printf("文件关闭")
+	}()
+	file.Write(request.Content)
+	log_ := mylog.NewNormalLog("创建表 '" + tableName + "' 成功")
+	log_.LogType = "INFO"
+	log_.LogGen(mylog.LogInputChan)
 
 	// 根据表的元信息进行相关的本地信息表的维护
 
