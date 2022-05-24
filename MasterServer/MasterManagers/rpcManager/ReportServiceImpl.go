@@ -47,7 +47,7 @@ func (p *ReportService) ReportTable(request []LocalTable, reply *ReportTableRes)
 
 	// 将分区服务器的所有表加入本地，同时令该服务器为表的master
 	for _, t := range request {
-		meta := global.TableMeta{}
+		meta := &global.TableMeta{}
 		meta.Name = t.Name
 		// ToDo:暂时让当前服务器就作为该表的主副本节点，之后需要进一步的判断！
 		// 在master本地更新相关信息

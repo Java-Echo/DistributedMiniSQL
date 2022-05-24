@@ -9,4 +9,5 @@ type Config struct {
 	Etcd_ip                      string
 	Etcd_port                    string
 	Etcd_region_stepout_catalog  string
+	Etcd_region_stepout_time     int64
 }

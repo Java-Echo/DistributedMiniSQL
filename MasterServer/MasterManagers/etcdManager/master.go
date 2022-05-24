@@ -39,8 +39,8 @@ func util_getLastKey(path string) string {
 	return keys[len(keys)-1]
 }
 
-// ToDo:合理安排这张全局的表的位置
-var RegionMap = make(map[string]string)
+// // ToDo:合理安排这张全局的表的位置
+// var RegionMap = make(map[string]string)
 
 // 进行相关的配置
 func Init() *clientv3.Client {
@@ -90,7 +90,16 @@ func CreateSlave(tableName string, ip string) error {
 	return nil
 }
 
-func DeleteSlave(table global.TableMeta, ip string) error {
+func DeleteSlave(tableName string, ip string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	_, err := global.Master.Delete(ctx, config.Configs.Etcd_table_catalog+"/"+tableName+"/"+"slave/"+ip)
+	if err != nil {
+		log.Fatalln(err)
+		return err
+	}
+	log := mylog.NewNormalLog("将节点" + ip + "从表" + tableName + "的slave副本下删除")
+	log.LogGen(mylog.LogInputChan)
 	return nil
 }
 
@@ -109,7 +118,16 @@ func CreateMaster(tableName string, ip string) error {
 	return nil
 }
 
-func DeleteMaster(table global.TableMeta, ip string) error {
+func DeleteMaster(tableName string, ip string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	_, err := global.Master.Delete(ctx, config.Configs.Etcd_table_catalog+"/"+tableName+"/"+"master/"+ip)
+	if err != nil {
+		log.Fatalln(err)
+		return err
+	}
+	log := mylog.NewNormalLog("将节点" + ip + "从表" + tableName + "的master副本下删除")
+	log.LogGen(mylog.LogInputChan)
 
 	return nil
 }
@@ -129,6 +147,16 @@ func CreateSyncSlave(tableName string, ip string) error {
 	return nil
 }
 
-func DeleteSyncSlave(table global.TableMeta, ip string, port string) error {
+func DeleteSyncSlave(tableName string, ip string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	_, err := global.Master.Delete(ctx, config.Configs.Etcd_table_catalog+"/"+tableName+"/"+"sync_slave/"+ip)
+	if err != nil {
+		log.Fatalln(err)
+		return err
+	}
+	log := mylog.NewNormalLog("将节点" + ip + "从表" + tableName + "的sync_slave副本下删除")
+	log.LogGen(mylog.LogInputChan)
+
 	return nil
 }

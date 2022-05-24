@@ -1,4 +1,4 @@
 
-  master_ip: "127.0.0.1"
+  master_ip: "10.192.250.176" # master节点的IP地址
   master_port: 1238
   region_port: 1237

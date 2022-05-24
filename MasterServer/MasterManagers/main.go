@@ -12,8 +12,8 @@ func main() {
 	mylog.LogInputChan = mylog.LogStart()
 	config.BuildConfig()
 	global.Master = etcd.Init()
-	global.RegionMap = make(map[string]global.RegionMeta)
-	global.TableMap = make(map[string]global.TableMeta)
+	global.RegionMap = make(map[string]*global.RegionMeta)
+	global.TableMap = make(map[string]*global.TableMeta)
 	// 发布rpc服务
 	go rpc.StartReportService(config.Configs.Rpc_m2r_port)
 	go rpc.StartCliService(config.Configs.Rpc_m2c_port)

@@ -12,31 +12,6 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
-// func RegisterWatcher(client *clientv3.Client, catalog string) {
-// 	watchChan := client.Watch(context.Background(), catalog, clientv3.WithPrefix())
-// 	log := mylog.NewNormalLog("master节点开启对集群节点目录'" + catalog + "'的监听")
-// 	log.LogGen(mylog.LogInputChan)
-
-// 	for watchResponse := range watchChan {
-// 		for _, event := range watchResponse.Events {
-// 			fmt.Printf("Type:%s,Key:%s,Value:%s\n", event.Type, event.Kv.Key, event.Kv.Value)
-// 			if event.Type == clientv3.EventTypePut {
-// 				// 为新加入的节点添加元信息
-// 				newMeta := global.RegionMeta{}
-// 				// ToDo:进一步完善相关的信息
-// 				global.RegionMap[string(event.Kv.Key)] = newMeta
-// 				// 记录日志
-// 				log := mylog.NewNormalLog("服务器 " + string(event.Kv.Key) + " 尝试建立连接")
-// 				log.LogGen(mylog.LogInputChan)
-// 			} else if event.Type == clientv3.EventTypeDelete {
-// 				// 记录日志
-// 				log := mylog.NewNormalLog("服务器 " + string(event.Kv.Key) + " 失去连接")
-// 				log.LogGen(mylog.LogInputChan)
-// 			}
-// 		}
-// 	}
-// }
-
 // ToDo:根据监控到的改变数据进行本地Region服务器的调整
 func RegisterWatcherWithWorker(client *clientv3.Client, catalog string, worker WatchWorkerInterface) {
 	watchChan := client.Watch(context.Background(), catalog, clientv3.WithPrefix())
@@ -66,7 +41,7 @@ type RegionRegisterWorker struct {
 
 func (p *RegionRegisterWorker) OnPut(event *clientv3.Event) {
 	// 为新加入的节点添加元信息
-	newMeta := global.RegionMeta{}
+	newMeta := &global.RegionMeta{}
 	ip := util_getLastKey(string(event.Kv.Key))
 	newMeta.IP = ip
 	newMeta.State = global.Working
@@ -82,14 +57,32 @@ func (p *RegionRegisterWorker) OnDelete(event *clientv3.Event) {
 
 	log_ := mylog.NewNormalLog("服务器 " + ip + " 失去连接")
 	log_.LogGen(mylog.LogInputChan)
+
 	// ToDo:修改全局表中的相关信息，这里的逻辑需要完善
 	preMeta := global.RegionMap[ip]
 	preMeta.State = global.Stop
+	// 从本地的table信息映射表+etcd目录中删除相关的节点
+	for _, table := range global.TableMap {
+		if table.MasterRegion == ip {
+			DeleteMaster(table.Name, ip)
+			table.MasterRegion = ""
+		} else if table.SyncRegion == ip {
+			DeleteSyncSlave(table.Name, ip)
+			table.SyncRegion = ""
+		}
+		for i, slave := range table.CopyRegions {
+			if slave == ip {
+				DeleteSlave(table.Name, ip)
+				table.CopyRegions = append(table.CopyRegions[:i], table.CopyRegions[i+1:]...)
+			}
+		}
+	}
+
 	// 将该region服务器加入到暂存区
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(config.Configs.Etcd_region_stepout_time)*time.Second)
 	defer cancel()
 	// 获取一个租约 有效期为60秒
-	leaseGrant, err := global.Master.Grant(ctx, 60)
+	leaseGrant, err := global.Master.Grant(ctx, config.Configs.Etcd_region_stepout_time)
 	if err != nil {
 		log.Printf("put error %v", err)
 		return
@@ -120,9 +113,18 @@ func (p *RegionStepOutWorker) OnPut(event *clientv3.Event) {
 }
 func (p *RegionStepOutWorker) OnDelete(event *clientv3.Event) {
 	ip := util_getLastKey(string(event.Kv.Key))
-
 	log := mylog.NewNormalLog("服务器 " + ip + " 离开“暂时失联”状态")
 	log.LogGen(mylog.LogInputChan)
+
+	regionMeta := global.RegionMap[ip]
+	if regionMeta.State == global.Stop {
+		log := mylog.NewNormalLog("服务器 " + ip + " 完全失去联系, 正在尝试清除它的一切")
+		log.LogGen(mylog.LogInputChan)
+	} else if regionMeta.State == global.Working {
+		log := mylog.NewNormalLog("服务器 " + ip + " 宕机重启成功")
+		log.LogGen(mylog.LogInputChan)
+	}
+
 }
 
 var _ WatchWorkerInterface = (*RegionStepOutWorker)(nil)
