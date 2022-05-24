@@ -8,4 +8,5 @@ type Config struct {
 	Rpc_m2c_port                 string
 	Etcd_ip                      string
 	Etcd_port                    string
+	Etcd_region_stepout_catalog  string
 }

@@ -6,16 +6,14 @@ import (
 	mylog "master/utils/LogSystem"
 	"master/utils/global"
 	"testing"
-
-	clientv3 "go.etcd.io/etcd/client/v3"
 )
-
-var master *clientv3.Client
 
 func TestMain(m *testing.M) {
 	mylog.LogInputChan = mylog.LogStart()
 	config.BuildConfig()
 	global.Master = Init()
+	global.RegionMap = make(map[string]global.RegionMeta)
+	global.TableMap = make(map[string]global.TableMeta)
 	fmt.Println("初始化完成")
 	m.Run()
 }

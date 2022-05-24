@@ -17,7 +17,8 @@ func main() {
 	// 发布rpc服务
 	go rpc.StartReportService(config.Configs.Rpc_m2r_port)
 	go rpc.StartCliService(config.Configs.Rpc_m2c_port)
-	go etcd.RegisterWatcher(global.Master, config.Configs.Etcd_region_register_catalog)
+	// go etcd.RegisterWatcher(global.Master, config.Configs.Etcd_region_register_catalog)
+	go etcd.RegisterWatcherWithWorker(global.Master, config.Configs.Etcd_region_register_catalog, &etcd.RegionRegisterWorker{})
 	for {
 
 	}
