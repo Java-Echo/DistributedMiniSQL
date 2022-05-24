@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strings"
 	"time"
 
 	config "master/utils/ConfigSystem"
@@ -30,6 +31,12 @@ func GetHostAddress() string {
 	}
 	fmt.Println("怎么出来了？")
 	return "127.0.0.1"
+}
+
+// 工具函数：得到路径的最后一个字段
+func util_getLastKey(path string) string {
+	keys := strings.Split(path, "/")
+	return keys[len(keys)-1]
 }
 
 // ToDo:合理安排这张全局的表的位置

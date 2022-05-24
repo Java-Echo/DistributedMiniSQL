@@ -19,6 +19,7 @@ func main() {
 	go rpc.StartCliService(config.Configs.Rpc_m2c_port)
 	// go etcd.RegisterWatcher(global.Master, config.Configs.Etcd_region_register_catalog)
 	go etcd.RegisterWatcherWithWorker(global.Master, config.Configs.Etcd_region_register_catalog, &etcd.RegionRegisterWorker{})
+	go etcd.RegisterWatcherWithWorker(global.Master, config.Configs.Etcd_region_stepout_catalog, &etcd.RegionStepOutWorker{})
 	for {
 
 	}

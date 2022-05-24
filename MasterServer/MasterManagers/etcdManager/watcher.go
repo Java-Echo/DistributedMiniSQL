@@ -3,36 +3,39 @@ package master
 import (
 	"context"
 	"fmt"
+	"log"
+	config "master/utils/ConfigSystem"
 	mylog "master/utils/LogSystem"
 	"master/utils/global"
+	"time"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
-func RegisterWatcher(client *clientv3.Client, catalog string) {
-	watchChan := client.Watch(context.Background(), catalog, clientv3.WithPrefix())
-	log := mylog.NewNormalLog("master节点开启对集群节点目录'" + catalog + "'的监听")
-	log.LogGen(mylog.LogInputChan)
+// func RegisterWatcher(client *clientv3.Client, catalog string) {
+// 	watchChan := client.Watch(context.Background(), catalog, clientv3.WithPrefix())
+// 	log := mylog.NewNormalLog("master节点开启对集群节点目录'" + catalog + "'的监听")
+// 	log.LogGen(mylog.LogInputChan)
 
-	for watchResponse := range watchChan {
-		for _, event := range watchResponse.Events {
-			fmt.Printf("Type:%s,Key:%s,Value:%s\n", event.Type, event.Kv.Key, event.Kv.Value)
-			if event.Type == clientv3.EventTypePut {
-				// 为新加入的节点添加元信息
-				newMeta := global.RegionMeta{}
-				// ToDo:进一步完善相关的信息
-				global.RegionMap[string(event.Kv.Key)] = newMeta
-				// 记录日志
-				log := mylog.NewNormalLog("服务器 " + string(event.Kv.Key) + " 尝试建立连接")
-				log.LogGen(mylog.LogInputChan)
-			} else if event.Type == clientv3.EventTypeDelete {
-				// 记录日志
-				log := mylog.NewNormalLog("服务器 " + string(event.Kv.Key) + " 失去连接")
-				log.LogGen(mylog.LogInputChan)
-			}
-		}
-	}
-}
+// 	for watchResponse := range watchChan {
+// 		for _, event := range watchResponse.Events {
+// 			fmt.Printf("Type:%s,Key:%s,Value:%s\n", event.Type, event.Kv.Key, event.Kv.Value)
+// 			if event.Type == clientv3.EventTypePut {
+// 				// 为新加入的节点添加元信息
+// 				newMeta := global.RegionMeta{}
+// 				// ToDo:进一步完善相关的信息
+// 				global.RegionMap[string(event.Kv.Key)] = newMeta
+// 				// 记录日志
+// 				log := mylog.NewNormalLog("服务器 " + string(event.Kv.Key) + " 尝试建立连接")
+// 				log.LogGen(mylog.LogInputChan)
+// 			} else if event.Type == clientv3.EventTypeDelete {
+// 				// 记录日志
+// 				log := mylog.NewNormalLog("服务器 " + string(event.Kv.Key) + " 失去连接")
+// 				log.LogGen(mylog.LogInputChan)
+// 			}
+// 		}
+// 	}
+// }
 
 // ToDo:根据监控到的改变数据进行本地Region服务器的调整
 func RegisterWatcherWithWorker(client *clientv3.Client, catalog string, worker WatchWorkerInterface) {
@@ -62,12 +65,44 @@ type RegionRegisterWorker struct {
 }
 
 func (p *RegionRegisterWorker) OnPut(event *clientv3.Event) {
-	log := mylog.NewNormalLog("服务器 " + string(event.Kv.Key) + " 尝试建立连接")
+	// 为新加入的节点添加元信息
+	newMeta := global.RegionMeta{}
+	ip := util_getLastKey(string(event.Kv.Key))
+	newMeta.IP = ip
+	newMeta.State = global.Working
+	// 将该节点加入到全局的表中
+	global.RegionMap[ip] = newMeta
+	// 写日志
+	log := mylog.NewNormalLog("服务器 " + ip + " 尝试建立连接")
 	log.LogGen(mylog.LogInputChan)
 }
+
 func (p *RegionRegisterWorker) OnDelete(event *clientv3.Event) {
-	log := mylog.NewNormalLog("服务器 " + string(event.Kv.Key) + " 失去连接")
-	log.LogGen(mylog.LogInputChan)
+	ip := util_getLastKey(string(event.Kv.Key))
+
+	log_ := mylog.NewNormalLog("服务器 " + ip + " 失去连接")
+	log_.LogGen(mylog.LogInputChan)
+	// ToDo:修改全局表中的相关信息，这里的逻辑需要完善
+	preMeta := global.RegionMap[ip]
+	preMeta.State = global.Stop
+	// 将该region服务器加入到暂存区
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	// 获取一个租约 有效期为60秒
+	leaseGrant, err := global.Master.Grant(ctx, 60)
+	if err != nil {
+		log.Printf("put error %v", err)
+		return
+	}
+
+	_, err = global.Master.Put(ctx, config.Configs.Etcd_region_stepout_catalog+"/"+ip, "", clientv3.WithLease(leaseGrant.ID))
+	if err != nil {
+		log.Printf("put error %v", err)
+		return
+	}
+
+	log_ = mylog.NewNormalLog("服务器 " + ip + " 加入到了暂存区")
+	log_.LogGen(mylog.LogInputChan)
 }
 
 var _ WatchWorkerInterface = (*RegionRegisterWorker)(nil)
@@ -76,12 +111,17 @@ var _ WatchWorkerInterface = (*RegionRegisterWorker)(nil)
 type RegionStepOutWorker struct {
 }
 
+// ToDo:这里的逻辑是不完善的
 func (p *RegionStepOutWorker) OnPut(event *clientv3.Event) {
-	log := mylog.NewNormalLog("服务器 " + string(event.Kv.Key) + " 进入“暂时失联”状态")
+	ip := util_getLastKey(string(event.Kv.Key))
+
+	log := mylog.NewNormalLog("服务器 " + ip + " 进入“暂时失联”状态")
 	log.LogGen(mylog.LogInputChan)
 }
 func (p *RegionStepOutWorker) OnDelete(event *clientv3.Event) {
-	log := mylog.NewNormalLog("服务器 " + string(event.Kv.Key) + " 离开“暂时失联”状态")
+	ip := util_getLastKey(string(event.Kv.Key))
+
+	log := mylog.NewNormalLog("服务器 " + ip + " 离开“暂时失联”状态")
 	log.LogGen(mylog.LogInputChan)
 }
 

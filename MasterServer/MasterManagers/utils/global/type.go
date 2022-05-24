@@ -8,8 +8,15 @@ import (
 type RegionMeta struct {
 	IP    string
 	Port  string
-	State string
+	State RegionState
 }
+
+type RegionState int32
+
+const (
+	Working RegionState = 0
+	Stop    RegionState = 1
+)
 
 // table的信息表
 type TableMeta struct {
