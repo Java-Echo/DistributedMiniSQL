@@ -39,7 +39,7 @@ var RegionMap = make(map[string]string)
 func Init() *clientv3.Client {
 	global.HostIP = GetHostAddress()
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints:   []string{"127.0.0.1:2379"},
+		Endpoints:   []string{config.Configs.Etcd_ip + ":" + config.Configs.Etcd_port},
 		DialTimeout: 5 * time.Second,
 	})
 	if err != nil {
