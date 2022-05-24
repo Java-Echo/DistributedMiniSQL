@@ -11,6 +11,7 @@ import (
 	config "region/utils/ConfigSystem"
 	mylog "region/utils/LogSystem"
 	"region/utils/global"
+	"strings"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
@@ -70,11 +71,18 @@ func StartWatchTable(table *global.TableMeta) {
 	for watchResponse := range watchChan {
 		for _, event := range watchResponse.Events {
 			if event.Type == 0 {
-				// ToDo:此时有节点失去了
+				// ToDo:此时有节点失去了，需要完成相应的逻辑
+				fmt.Println("检测到表 '" + table.Name + "' 下有项目加入")
+				fmt.Println("该表在本地为 '" + util_getKey(string(event.Kv.Key), catalog, 0) + "' 类型的副本")
+				fmt.Println("该表所对应的IP为 '" + util_getLastKey(string(event.Kv.Key)) + "' ")
 				// 将节点从本地删去
 			} else if event.Type == 1 {
 				// ToDo:此时有节点新加入了
-				// 首先将其加入异步从副本，然后向其传输日志文件快照
+				// 首先将其加入异步从副本，然后开启一个Goroutine向其传输日志文件快照(尽可能同时完成)
+				fmt.Println("检测到表 '" + table.Name + "' 下有项目删除")
+				fmt.Println("该表在本地为 '" + util_getKey(string(event.Kv.Key), catalog, 0) + "' 类型的副本")
+				fmt.Println("该表所对应的IP为 '" + util_getLastKey(string(event.Kv.Key)) + "' ")
+				// 如果是同步从副本的指令，则需要在日志全部运行完成的时候通知本程序，然后再将其加入到同步从副本中
 			}
 		}
 	}
@@ -112,20 +120,33 @@ func SendNewTables(tableRoot string) {
 	// ToDo:对rpc的返回值进行处理，建立本地的数据表
 	// fmt.Println("本次返回的数组长度为:" + strconv.Itoa(len(reply.Tables)))
 	for _, table := range reply.Tables {
-		meta := global.TableMeta{}
+		meta := &global.TableMeta{}
 		meta.Level = table.Level
 		meta.Name = table.Name
 		if table.Level == "master" {
 			// 建立这个表的其他元信息
 			catalog := config.Configs.Etcd_table_catalog + "/" + table.Name + "/"
 			meta.TableWatcher = etcd.GetWatcher(global.Region, catalog)
+			global.TableMap[meta.Name] = meta
 			// ToDo:完善对于主副本建立监听机制
-			go StartWatchTable(&meta)
+			go StartWatchTable(meta)
 			// ToDo:第一次遍历这个目录检查从副本数量，一旦数量不够，就向master索取
-			syncNeed, slaveNeed := CheckSlave(meta)
+			syncNeed, slaveNeed := CheckSlave(*meta)
 			GetSlave(meta.Name, syncNeed, slaveNeed)
 		} else if table.Level == "slave" {
 
 		}
 	}
+}
+
+// 工具函数：得到路径的最后一个字段
+func util_getLastKey(path string) string {
+	keys := strings.Split(path, "/")
+	return keys[len(keys)-1]
+}
+
+func util_getKey(path string, prefix string, n int) string {
+	str := path[len(prefix):]
+	keys := strings.Split(str, "/")
+	return keys[n]
 }

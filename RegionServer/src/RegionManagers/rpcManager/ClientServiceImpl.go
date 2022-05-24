@@ -49,10 +49,28 @@ func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
 	fmt.Println("接受到的SQL语句的类型为:" + request.SQLtype)
 	switch request.SQLtype {
 	case "select":
+		// 首先检查本地是否有这张表
+
+		// 检查这张表的版本是否有问题(暂时先不做)
+
+		// 调用sql的查询
 		fmt.Println("单纯的查询操作")
 	case "delete", "insert", "update":
+		// 首先检查本地是否有这张表，并查看该表的副本等级
+
+		// 尝试在本地完成修改
+
+		// 尝试向同步从副本进行修改
+
+		// 尝试将相关信息存储到异步从副本当中
+
+		// 成功返回
 		fmt.Println("对数据表的局部改动操作")
 	case "create_table", "delete_table":
+		// 首先在本地进行SQL的执行，得到执行结果
+
+		// 本地创建成功，尝试向master申请主副本
+
 		fmt.Println("这个操作不得了，要对数据表整体改动")
 	default:
 		fmt.Println("什么b操作?")

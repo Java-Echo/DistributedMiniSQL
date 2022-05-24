@@ -65,6 +65,7 @@ func (p *RegionRegisterWorker) OnDelete(event *clientv3.Event) {
 	for _, table := range global.TableMap {
 		if table.MasterRegion == ip {
 			DeleteMaster(table.Name, ip)
+			// ToDo:这里需要启用从副本来进行容错容灾
 			table.MasterRegion = ""
 		} else if table.SyncRegion == ip {
 			DeleteSyncSlave(table.Name, ip)

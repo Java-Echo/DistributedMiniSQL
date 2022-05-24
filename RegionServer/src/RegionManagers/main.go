@@ -16,6 +16,7 @@ func main() {
 	global.Region = etcd.Init()
 	global.MasterIP = etcd.GetMasterIP(global.Region)
 	global.AsyncLogSQLChan = regionWorker.StartAsyncCopy() // 开启全局的异步备份管道
+	global.TableMap = make(map[string]*global.TableMeta)
 	go etcd.ServiceRegister(global.Region)
 	// 注册rpc服务
 	rpc.RpcM2R, _ = rpc.DialReportService("tcp", global.MasterIP+":"+config.Configs.Rpc_M2R_port)
