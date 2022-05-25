@@ -1,7 +1,6 @@
 package rpc
 
 import (
-	"fmt"
 	"log"
 	"net"
 	"net/rpc"
@@ -58,7 +57,6 @@ func (p *GossipService) PassTable(request PassTableRst, reply *PassTableRes) err
 	}
 	defer func() {
 		file.Close()
-		fmt.Printf("文件关闭")
 	}()
 	file.Write(request.Content)
 	log_ := mylog.NewNormalLog("创建表 '" + tableName + "' 成功")

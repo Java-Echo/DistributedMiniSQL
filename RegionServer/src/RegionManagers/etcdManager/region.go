@@ -72,7 +72,6 @@ func ServiceRegister(client *clientv3.Client) {
 		<-keepaliveResponseChan
 		// fmt.Println("ttl:", ka.TTL)
 	}
-
 }
 
 // 获取master的相关信息(返回 ip+port)

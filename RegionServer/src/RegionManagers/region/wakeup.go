@@ -70,19 +70,20 @@ func StartWatchTable(table *global.TableMeta) {
 
 	for watchResponse := range watchChan {
 		for _, event := range watchResponse.Events {
-			if event.Type == 0 {
-				// ToDo:此时有节点失去了，需要完成相应的逻辑
+			if event.Type == clientv3.EventTypePut {
+				// ToDo:此时有节点加入了，需要完成相应的逻辑
 				fmt.Println("检测到表 '" + table.Name + "' 下有项目加入")
 				fmt.Println("该表在本地为 '" + util_getKey(string(event.Kv.Key), catalog, 0) + "' 类型的副本")
 				fmt.Println("该表所对应的IP为 '" + util_getLastKey(string(event.Kv.Key)) + "' ")
-				// 将节点从本地删去
-			} else if event.Type == 1 {
-				// ToDo:此时有节点新加入了
 				// 首先将其加入异步从副本，然后开启一个Goroutine向其传输日志文件快照(尽可能同时完成)
+				// 如果是同步从副本的指令，则需要在日志全部运行完成的时候通知本程序，然后再将其加入到同步从副本中
+				// 将节点从本地删去
+			} else if event.Type == clientv3.EventTypeDelete {
+				// ToDo:此时有节点被删去了
 				fmt.Println("检测到表 '" + table.Name + "' 下有项目删除")
 				fmt.Println("该表在本地为 '" + util_getKey(string(event.Kv.Key), catalog, 0) + "' 类型的副本")
 				fmt.Println("该表所对应的IP为 '" + util_getLastKey(string(event.Kv.Key)) + "' ")
-				// 如果是同步从副本的指令，则需要在日志全部运行完成的时候通知本程序，然后再将其加入到同步从副本中
+				// 将节点从本地删去
 			}
 		}
 	}

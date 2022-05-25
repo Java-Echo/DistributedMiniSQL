@@ -48,7 +48,7 @@ func (p *CliServiceClient) Hello(request string, reply *string) error {
 	return p.Client.Call(ServiceName+".Hello", request, reply)
 }
 
-// 方法：SQL的执行
+// 方法：由client调用的SQL的执行
 func (p *CliServiceClient) SQL(request SQLRst, reply *SQLRes) error {
 	return p.Client.Call(ServiceName+".SQL", request, reply)
 }

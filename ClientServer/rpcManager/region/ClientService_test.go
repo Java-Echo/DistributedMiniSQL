@@ -29,9 +29,9 @@ func TestCliServiceClient_Hello(t *testing.T) {
 
 func TestCliServiceClient_SQL(t *testing.T) {
 	var request SQLRst
-	request.SQL = "select * from aaa"
-	request.SQLtype = "select"
-	request.Table = "aaa"
+	request.SQL = "select * from test1"
+	request.SQLtype = "insert"
+	request.Table = "test1"
 	var reply SQLRes
 	err := client.SQL(request, &reply)
 	if err != nil {
