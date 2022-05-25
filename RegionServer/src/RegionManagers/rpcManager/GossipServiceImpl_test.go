@@ -13,8 +13,8 @@ func TestGossipService_PassLog(t *testing.T) {
 	}
 	var reply PassLogRes
 	request := PassLogRst{
-		SQLtype: "insert",
-		SQL:     "inset xxx",
+		SqlType: "insert",
+		Sql:     "inset xxx",
 		Table:   "aaa",
 	}
 	err = client.PassLog(request, &reply)

@@ -30,9 +30,9 @@ type AskSlaveRes struct {
 
 /*-------------GossipService--------------------*/
 type PassLogRst struct {
-	SQLtype string // SQL语句的类型
+	SqlType string // SQL语句的类型
 	Table   string // SQL语句具体查询的表
-	SQL     string // 具体的SQL语句
+	Sql     string // 具体的SQL语句
 }
 
 type PassLogRes struct {

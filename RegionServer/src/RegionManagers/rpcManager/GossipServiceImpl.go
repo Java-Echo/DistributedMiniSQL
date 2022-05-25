@@ -39,9 +39,9 @@ func StartGossipService(port string) {
 func (p *GossipService) PassLog(request PassLogRst, reply *PassLogRes) error {
 	// 需要接受当前的日志
 	global.AsyncLogSQLChan <- global.SQLLog{
-		SQLtype: request.SQLtype,
+		SQLtype: request.SqlType,
 		Table:   request.Table,
-		SQL:     request.SQL,
+		SQL:     request.Sql,
 	}
 	log_ := mylog.NewNormalLog("接受到来自表" + request.Table + "的同步日志")
 	log_.LogType = "INFO"

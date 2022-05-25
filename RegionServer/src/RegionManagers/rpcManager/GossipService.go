@@ -31,8 +31,8 @@ func RegisterGossipService(svc GossipServiceInterface) error {
 // ========以下是真正暴露出来的接口========
 // 接口定义
 type GossipServiceInterface = interface {
-	PassLog(request PassLogRst, reply *PassLogRes) error
 	PassTable(request PassTableRst, reply *PassTableRes) error
+	PassLog(request PassLogRst, reply *PassLogRes) error
 	// ToDo:可以定义更多的函数
 }
 
@@ -43,5 +43,5 @@ func (p *GossipServiceClient) PassLog(request PassLogRst, reply *PassLogRes) err
 
 // 传递一个表的文件
 func (p *GossipServiceClient) PassTable(request PassTableRst, reply *PassTableRes) error {
-	return p.Client.Call(GossipServiceName+".PassLog", request, reply)
+	return p.Client.Call(GossipServiceName+".PassTable", request, reply)
 }
