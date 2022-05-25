@@ -1,3 +1,3 @@
-package Utils
+package global
 
-var responseString chan string
+var ResponseString chan string

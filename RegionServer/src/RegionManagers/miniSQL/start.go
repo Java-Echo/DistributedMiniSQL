@@ -13,6 +13,7 @@ import (
 	"region/miniSQL/src/Interpreter/types"
 	"region/miniSQL/src/RecordManager"
 	"region/miniSQL/src/Utils/Error"
+	"region/miniSQL/src/global"
 	"strings"
 	"time"
 
@@ -176,7 +177,7 @@ func runShell(r chan<- error, in chan string, out chan string) {
 func start(input chan string, output chan string) {
 	//errChan 用于接收shell返回的err
 	errChan := make(chan error)
-	global.responseString = output
+	global.ResponseString = output
 	go runShell(errChan, input, output) //开启shell协程
 	go BackEnd.Regist()
 	err := <-errChan
