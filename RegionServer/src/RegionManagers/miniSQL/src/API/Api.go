@@ -15,16 +15,16 @@ import (
 	"sync"
 )
 
-var ResponseString = make(chan string, 10)
+// var ResponseString = make(chan string, 10)
 
-func getOutput() chan<- string {
-	return ResponseString
-}
+// func getOutput() chan<- string {
+// 	return ResponseString
+// }
 
 //HandleOneParse 用来处理parse处理完的DStatement类型  dataChannel是接收Statement的通道,整个mysql运行过程中不会关闭，但是quit后就会关闭
 //stopChannel 用来发送同步信号，每次处理完一个后就发送一个信号用来同步两协程，主协程需要接收到stopChannel的发送后才能继续下一条指令，当dataChannel
 //关闭后，stopChannel才会关闭
-func HandleOneParse(dataChannel <-chan types.DStatements, stopChannel chan<- Error.Error) {
+func HandleOneParse(dataChannel <-chan types.DStatements, stopChannel chan<- Error.Error, ResponseString chan string) {
 	var err Error.Error
 	for statement := range dataChannel {
 		//fmt.Println(statement)
@@ -48,7 +48,7 @@ func HandleOneParse(dataChannel <-chan types.DStatements, stopChannel chan<- Err
 
 			} else {
 				fmt.Printf("now you are using database.\n")
-				// ResponseString <- "Succeed"
+				ResponseString <- "Succeed"
 			}
 
 		case types.CreateTable:
@@ -162,7 +162,7 @@ func HandleOneParse(dataChannel <-chan types.DStatements, stopChannel chan<- Err
 				fmt.Println(tmp)
 			}
 		case types.ExecFile:
-			err = ExecFileAPI(statement.(types.ExecFileStatement))
+			err = ExecFileAPI(statement.(types.ExecFileStatement), ResponseString)
 			ResponseString <- "Succeed"
 		}
 		//fmt.Println(err)
@@ -374,7 +374,7 @@ func SelectAPI(statement types.SelectStatement) Error.Error {
 }
 
 // ExecFileAPI 执行某文件  开辟两个新协程
-func ExecFileAPI(statement types.ExecFileStatement) Error.Error {
+func ExecFileAPI(statement types.ExecFileStatement, out chan string) Error.Error {
 	//parse协程 有缓冲信道
 	StatementChannel := make(chan types.DStatements, 500)
 	FinishChannel := make(chan Error.Error, 500)
@@ -389,7 +389,7 @@ func ExecFileAPI(statement types.ExecFileStatement) Error.Error {
 	var wg sync.WaitGroup
 	wg.Add(1) //等待FinishChannel关闭
 
-	go HandleOneParse(StatementChannel, FinishChannel) //begin the runtime for exec
+	go HandleOneParse(StatementChannel, FinishChannel, out) //begin the runtime for exec
 	go func() {
 		defer wg.Done()
 		for _ = range FinishChannel {

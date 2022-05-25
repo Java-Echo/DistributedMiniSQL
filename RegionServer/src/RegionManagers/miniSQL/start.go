@@ -108,10 +108,10 @@ func runShell(r chan<- error, in chan string, out chan string) {
 	}
 	InitDB()
 
-	StatementChannel := make(chan types.DStatements, 500)  //用于传输操作指令通道
-	FinishChannel := make(chan Error.Error, 500)           //用于api执行完成反馈通道
-	FlushChannel := make(chan struct{})                    //用于每条指令结束后协程flush
-	go API.HandleOneParse(StatementChannel, FinishChannel) //begin the runtime for exec
+	StatementChannel := make(chan types.DStatements, 500)       //用于传输操作指令通道
+	FinishChannel := make(chan Error.Error, 500)                //用于api执行完成反馈通道
+	FlushChannel := make(chan struct{})                         //用于每条指令结束后协程flush
+	go API.HandleOneParse(StatementChannel, FinishChannel, out) //begin the runtime for exec
 	go BufferManager.BeginBlockFlush(FlushChannel)
 	var beginSQLParse = false
 	var sqlText = make([]byte, 0, 100)
