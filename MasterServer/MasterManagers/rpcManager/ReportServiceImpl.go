@@ -71,7 +71,8 @@ func (p *ReportService) ReportTable(request []LocalTable, reply *ReportTableRes)
 // ToDo:设立合适的选择region的逻辑，然后及时将这个region添加到etcd上面
 // ToDo:尚未完成节点筛选逻辑的实现
 func (p *ReportService) AskSlave(request AskSlaveRst, reply *AskSlaveRes) error {
-	source := []string{request.TableName}
+	masterIP := global.TableMap[request.TableName].MasterRegion
+	source := []string{masterIP}
 	newSyncSlave := selectRegion(request.SyncSlaveNum, source)
 	source = append(source, newSyncSlave...)
 	newSlave := selectRegion(request.SlaveNum, source)
@@ -91,14 +92,17 @@ func (p *ReportService) AskSlave(request AskSlaveRst, reply *AskSlaveRes) error 
 
 // ToDo:从除了source之外的region中选出n个合适的
 func selectRegion(n int, source []string) []string {
+	// 检查一下source中的表
 	fmt.Println("本地所有的表为:")
 	for ip, _ := range global.RegionMap {
 		fmt.Println(ip)
 	}
 	fmt.Println("source中的表为:")
-	for ip, _ := range source {
+	for _, ip := range source {
 		fmt.Println(ip)
 	}
+
+	// 真正开始找表的地方
 	res := make([]string, 0)
 	num := 0
 	for ip, _ := range global.RegionMap {
@@ -117,6 +121,8 @@ func selectRegion(n int, source []string) []string {
 			num++
 		}
 	}
+	fmt.Print("我们选定的表为:")
+	fmt.Println(res)
 	return res
 }
 

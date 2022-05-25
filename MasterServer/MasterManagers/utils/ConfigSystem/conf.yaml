@@ -2,7 +2,7 @@
   etcd_table_catalog: /tables #所有的表存放的主目录
   rpc_m2r_port: 1236  #master服务器对region服务器暴露的RPC端口
   rpc_m2c_port: 1238  #master服务器对client暴露的RPC端口
-  etcd_ip: 10.211.55.5  #etcd服务器所在的ip地址
+  etcd_ip: 192.168.31.68  #etcd服务器所在的ip地址
   etcd_port: 2379 #etcd服务器所在的端口
   etcd_region_stepout_catalog: /stepoutServer #暂时离开的server的目录
   etcd_region_stepout_time: 10 #最长能够等待的服务器宕机重启时间
