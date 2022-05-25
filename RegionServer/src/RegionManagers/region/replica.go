@@ -117,6 +117,44 @@ func StartWatchTable(table *global.TableMeta) {
 	}
 }
 
+// 同步从副本的监听机制，监听的是master目录的相关变化，一旦master目录变成了自己，那么自己就需要完成相关的提升
+func StartWatchMaster(table *global.TableMeta) {
+	catalog := config.Configs.Etcd_table_catalog + "/" + table.Name + "/master/"
+	fmt.Println("监听的目录为:" + catalog)
+	watchChan := global.Region.Watch(context.Background(), catalog, clientv3.WithPrefix())
+	table.MasterWatcher = &watchChan
+	log_ := mylog.NewNormalLog("开启对表'" + table.Name + "'的master目录的监听")
+	log_.LogGen(mylog.LogInputChan)
+
+	for watchResponse := range watchChan {
+		for _, event := range watchResponse.Events {
+			if event.Type == clientv3.EventTypePut {
+				newMaster := util_getKey(string(event.Kv.Key), catalog, 0)
+				fmt.Println("新成为master的节点为:" + newMaster)
+				if newMaster == global.HostIP {
+					fmt.Println("巧了,就是我要新成为master!")
+					// 以下是在本地的表元信息映射表中，修改这张表
+					table.Level = "master"
+					catalog := config.Configs.Etcd_table_catalog + "/" + table.Name + "/"
+					table.TableWatcher = etcd.GetWatcher(global.Region, catalog)
+					go StartWatchTable(table)
+					// 第一次遍历这个目录检查从副本数量，一旦数量不够，就向master索取
+					syncNeed, slaveNeed := CheckSlave(*table)
+					GetSlave(table.Name, syncNeed, slaveNeed)
+				}
+			} else if event.Type == clientv3.EventTypeDelete {
+				oldMaster := util_getKey(string(event.Kv.Key), catalog, 0)
+				fmt.Println("刚刚被删除的节点为:" + oldMaster)
+				if oldMaster == global.HostIP {
+					fmt.Println("糟了,被抛弃的节点竟然是我自己！")
+					// ToDo:当前我们的设计是直接将被抛弃的主节点直接没了，连从副本都当不成
+					// ToDo:尚未实现这里的逻辑
+				}
+			}
+		}
+	}
+}
+
 // ToDo:得到对应的表的内容
 func getTableFile(tableName string) []byte {
 	test := "123456"

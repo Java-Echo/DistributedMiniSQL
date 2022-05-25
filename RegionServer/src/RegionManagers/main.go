@@ -18,6 +18,9 @@ func main() {
 	global.AsyncLogSQLChan = regionWorker.StartAsyncCopy() // 开启全局的异步备份管道
 	global.TableMap = make(map[string]*global.TableMeta)
 	go etcd.ServiceRegister(global.Region)
+	// 开启本地的SQL服务
+	global.SQLInput = make(chan string)
+	global.SQLOutput = make(chan string)
 	// 注册rpc服务
 	rpc.RpcM2R, _ = rpc.DialReportService("tcp", global.MasterIP+":"+config.Configs.Rpc_M2R_port)
 

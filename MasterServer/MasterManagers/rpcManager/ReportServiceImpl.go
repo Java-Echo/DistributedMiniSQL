@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"fmt"
 	"log"
 	etcd "master/etcdManager"
 	mylog "master/utils/LogSystem"
@@ -77,9 +78,11 @@ func (p *ReportService) AskSlave(request AskSlaveRst, reply *AskSlaveRes) error 
 	// 在etcd上注册
 	for _, s := range newSyncSlave {
 		etcd.CreateSyncSlave(request.TableName, s)
+		global.TableMap[request.TableName].SyncRegion = s
 	}
 	for _, s := range newSlave {
 		etcd.CreateSlave(request.TableName, s)
+		global.TableMap[request.TableName].CopyRegions = append(global.TableMap[request.TableName].CopyRegions, s)
 	}
 
 	reply.State = "成功！"
@@ -88,7 +91,32 @@ func (p *ReportService) AskSlave(request AskSlaveRst, reply *AskSlaveRes) error 
 
 // ToDo:从除了source之外的region中选出n个合适的
 func selectRegion(n int, source []string) []string {
+	fmt.Println("本地所有的表为:")
+	for ip, _ := range global.RegionMap {
+		fmt.Println(ip)
+	}
+	fmt.Println("source中的表为:")
+	for ip, _ := range source {
+		fmt.Println(ip)
+	}
 	res := make([]string, 0)
+	num := 0
+	for ip, _ := range global.RegionMap {
+		if num >= n {
+			break
+		}
+		inSource := false
+		for _, ip_ := range source {
+			if ip_ == ip {
+				inSource = true
+				break
+			}
+		}
+		if !inSource {
+			res = append(res, ip)
+			num++
+		}
+	}
 	return res
 }
 
