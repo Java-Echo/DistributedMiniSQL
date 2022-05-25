@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"net/rpc"
@@ -49,8 +50,15 @@ func (p *GossipService) PassLog(request PassLogRst, reply *PassLogRes) error {
 }
 
 func (p *GossipService) PassTable(request PassTableRst, reply *PassTableRes) error {
-	// 首先接受整个表文件
 	tableName := request.TableName
+
+	// 1. 根据表的元信息进行相关的本地信息表的维护
+	meta := &global.TableMeta{}
+	meta.Name = tableName
+	meta.Level = "slave"
+	meta.WriteLock = make(chan int)
+
+	// 2. 首先接受整个表文件
 	file, err := os.Create(tableName)
 	if err != nil {
 		log.Fatal("创建文件失败")
@@ -63,7 +71,9 @@ func (p *GossipService) PassTable(request PassTableRst, reply *PassTableRes) err
 	log_.LogType = "INFO"
 	log_.LogGen(mylog.LogInputChan)
 
-	// 根据表的元信息进行相关的本地信息表的维护
+	// 3. 归还写锁
+	meta.WriteLock <- 1
+	fmt.Println("归还写锁")
 
 	// 要不要开启一些channel之类的？
 	return nil

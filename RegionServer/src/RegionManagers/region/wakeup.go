@@ -1,19 +1,14 @@
 package regionWorker
 
 import (
-	"context"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	etcd "region/etcdManager"
 	rpc "region/rpcManager"
 	config "region/utils/ConfigSystem"
-	mylog "region/utils/LogSystem"
 	"region/utils/global"
 	"strings"
-
-	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 // 在本地的主副本文件夹下面查找所有的表名
@@ -57,36 +52,6 @@ func findSlaveCopy(tableRoot string) []string {
 	}
 
 	return files
-}
-
-// ToDo:监听主副本在etcd上的目录的信息，根据这个目录的不同变化来做出不同的反应
-func StartWatchTable(table *global.TableMeta) {
-	catalog := config.Configs.Etcd_table_catalog + "/" + table.Name + "/"
-	fmt.Println("监听的目录为:" + catalog)
-	watchChan := global.Region.Watch(context.Background(), catalog, clientv3.WithPrefix())
-	table.TableWatcher = &watchChan
-	log := mylog.NewNormalLog("开启对表'" + table.Name + "'目录的监听")
-	log.LogGen(mylog.LogInputChan)
-
-	for watchResponse := range watchChan {
-		for _, event := range watchResponse.Events {
-			if event.Type == clientv3.EventTypePut {
-				// ToDo:此时有节点加入了，需要完成相应的逻辑
-				fmt.Println("检测到表 '" + table.Name + "' 下有项目加入")
-				fmt.Println("该表在本地为 '" + util_getKey(string(event.Kv.Key), catalog, 0) + "' 类型的副本")
-				fmt.Println("该表所对应的IP为 '" + util_getLastKey(string(event.Kv.Key)) + "' ")
-				// 首先将其加入异步从副本，然后开启一个Goroutine向其传输日志文件快照(尽可能同时完成)
-				// 如果是同步从副本的指令，则需要在日志全部运行完成的时候通知本程序，然后再将其加入到同步从副本中
-				// 将节点从本地删去
-			} else if event.Type == clientv3.EventTypeDelete {
-				// ToDo:此时有节点被删去了
-				fmt.Println("检测到表 '" + table.Name + "' 下有项目删除")
-				fmt.Println("该表在本地为 '" + util_getKey(string(event.Kv.Key), catalog, 0) + "' 类型的副本")
-				fmt.Println("该表所对应的IP为 '" + util_getLastKey(string(event.Kv.Key)) + "' ")
-				// 将节点从本地删去
-			}
-		}
-	}
 }
 
 // 完成分区服务器新建和重启的相关任务

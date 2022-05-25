@@ -13,6 +13,7 @@ type TableMeta struct {
 	Name         string              // 表的名称
 	Level        string              // 表的等级(master/slave/sync_slave)
 	State        string              // 表的状态
+	WriteLock    chan int            // 写锁
 	TableWatcher *clientv3.WatchChan // 监听表在etcd上的目录(只有在等级为master的时候有用)
 	SyncRegion   string              // 同步从副本(只有在等级为master的时候有用)
 	CopyRegions  []string            // 异步从副本(只有在等级为master的时候有用)
