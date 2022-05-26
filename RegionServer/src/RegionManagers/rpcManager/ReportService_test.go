@@ -1,10 +1,8 @@
 package rpc
 
 import (
-	"fmt"
 	"log"
 	config "region/utils/ConfigSystem"
-	mylog "region/utils/LogSystem"
 	"strconv"
 	"testing"
 
@@ -12,13 +10,6 @@ import (
 )
 
 var cli *clientv3.Client
-
-func TestMain(m *testing.M) {
-	mylog.LogInputChan = mylog.LogStart()
-	config.BuildConfig()
-	fmt.Println("初始化完成")
-	m.Run()
-}
 
 func TestReportServiceClient_ReportTable(t *testing.T) {
 	client, err := DialReportService("tcp", "localhost:"+config.Configs.Rpc_M2R_port)

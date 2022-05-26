@@ -1,4 +1,4 @@
-package main
+package miniSQL
 
 import (
 	"testing"
@@ -8,7 +8,7 @@ import (
 func Test_start(t *testing.T) {
 	in := make(chan string, 1)
 	out := make(chan string, 1)
-	go start(in, out)
+	go Start(in, out)
 	in <- "use database aaa;"
 	<-out
 	in <- "create table ttt( id int);"

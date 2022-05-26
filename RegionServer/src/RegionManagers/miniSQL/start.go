@@ -1,4 +1,4 @@
-package main
+package miniSQL
 
 import (
 	"bufio"
@@ -18,6 +18,8 @@ import (
 	"time"
 
 	"github.com/peterh/liner"
+
+	mylog "region/utils/LogSystem"
 )
 
 const historyCommmandFile = "~/.minisql_history"
@@ -174,12 +176,17 @@ func runShell(r chan<- error, in chan string, out chan string) {
 	}
 }
 
-func start(input chan string, output chan string) {
+func Start(input chan string, output chan string) {
 	//errChan 用于接收shell返回的err
 	errChan := make(chan error)
 	global.ResponseString = output
 	go runShell(errChan, input, output) //开启shell协程
 	go BackEnd.Regist()
+
+	log := mylog.NewNormalLog("成功启动miniSQL")
+	log.LogType = "INFO"
+	log.LogGen(mylog.LogInputChan)
+
 	err := <-errChan
 	fmt.Println("bye")
 	if err != nil {

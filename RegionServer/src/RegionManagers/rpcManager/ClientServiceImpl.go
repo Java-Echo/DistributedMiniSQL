@@ -86,7 +86,7 @@ func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
 			return nil
 		}
 		// 尝试在本地完成修改
-		ok := MasterSQLChange(request.SQL)
+		_, ok := MasterSQLChange(request.SQL)
 		if ok {
 			log_ := mylog.NewNormalLog("执行SQL语句 '" + request.SQL + "' 成功")
 			log_.LogType = "INFO"

@@ -2,6 +2,7 @@ package main
 
 import (
 	etcd "region/etcdManager"
+	miniSQL "region/miniSQL"
 	regionWorker "region/region"
 	rpc "region/rpcManager"
 	config "region/utils/ConfigSystem"
@@ -21,9 +22,9 @@ func main() {
 	// 开启本地的SQL服务
 	global.SQLInput = make(chan string)
 	global.SQLOutput = make(chan string)
+	go miniSQL.Start(global.SQLInput, global.SQLOutput)
 	// 注册rpc服务
 	rpc.RpcM2R, _ = rpc.DialReportService("tcp", global.MasterIP+":"+config.Configs.Rpc_M2R_port)
-
 	// 向master报告本地的表
 	regionWorker.SendLocalTables(config.Configs.Minisql_table_store)
 	// 发布rpc服务
