@@ -9,7 +9,7 @@ import (
 	config "region/utils/ConfigSystem"
 	mylog "region/utils/LogSystem"
 	"region/utils/global"
-	"time"
+	"strconv"
 )
 
 func main() {
@@ -22,11 +22,11 @@ func main() {
 	global.TableMap = make(map[string]*global.TableMeta)
 	go etcd.ServiceRegister(global.Region)
 	// 开启本地的SQL服务
-	global.SQLInput = make(chan string)
-	global.SQLOutput = make(chan string)
+	global.SQLInput = make(chan string, 1)
+	global.SQLOutput = make(chan string, 1)
 	go miniSQL.Start(global.SQLInput, global.SQLOutput)
 
-	// go buildSQL()
+	buildSQL()
 
 	// 注册rpc服务
 	rpc.RpcM2R, _ = rpc.DialReportService("tcp", global.MasterIP+":"+config.Configs.Rpc_M2R_port)
@@ -45,8 +45,16 @@ func buildSQL() {
 	// global.SQLInput <- "create database aaa;"
 	// res := <-global.SQLOutput
 	// fmt.Println(res)
-	time.Sleep(3 * time.Second)
+	// time.Sleep(3 * time.Second)
+	fmt.Println(0)
+	fmt.Println("管道的内容数量为:" + strconv.Itoa(len(global.SQLInput)))
+	_, isOpen := <-global.SQLInput
+	if !isOpen {
+		fmt.Println("管道已被关闭")
+	}
 	global.SQLInput <- "use database aaa;"
+	fmt.Println(1)
 	res := <-global.SQLOutput
+	fmt.Println(2)
 	fmt.Println(res)
 }

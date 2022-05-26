@@ -1,7 +1,6 @@
 package rpc
 
 import (
-	"fmt"
 	"region/utils/global"
 )
 
@@ -37,9 +36,7 @@ func MasterSQLTableDelete(SQL string) (string, bool) {
 /*--------------常规的SQL操作--------------*/
 // ToDo:查询语句
 func SQLSelect(SQL string) (string, bool) {
-	fmt.Println("1")
 	global.SQLInput <- SQL
-	fmt.Println("2")
 	res := <-global.SQLOutput
 	return res, true
 }
