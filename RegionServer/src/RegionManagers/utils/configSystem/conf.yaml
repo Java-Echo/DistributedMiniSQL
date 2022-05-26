@@ -1,4 +1,4 @@
-  etcd_ip: 192.168.31.68 # 当前的etcd的ip地址！
+  etcd_ip: 10.162.19.119 # 当前的etcd的ip地址！
   etcd_port: 2379
   etcd_region_register_catalog: /server #需要完成注册的位置
   etcd_master_address: /config/masterAddress #Master的地址
@@ -6,4 +6,4 @@
   rpc_r2r_port: 1235  #region服务器对region服务器暴露的RPC端口
   rpc_r2c_port: 1237  #region服务器对client暴露的RPC端口
   etcd_table_catalog: /tables #所有的表存放的主目录
-  minisql_table_store: ../miniSQL/data/d_aaa_data # 限定数据库的名称为aaa
+  minisql_table_store: ./miniSQL/data/d_aaa_data # 限定数据库的名称为aaa

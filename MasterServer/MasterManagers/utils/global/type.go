@@ -1,6 +1,8 @@
 package global
 
 import (
+	"fmt"
+
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
@@ -31,3 +33,50 @@ var RegionMap map[string]*RegionMeta // 所有分区服务器的元信息
 var TableMap map[string]*TableMeta   // 所有表的元信息
 var HostIP string
 var Master *clientv3.Client
+
+// =========测试函数=========
+
+func PrintRegionMap(indent int) {
+	for _, region := range RegionMap {
+		fmt.Println("------------------")
+		PrintRegion(1, *region)
+	}
+}
+
+func PrintTableMap(indent int) {
+	for _, table := range TableMap {
+		fmt.Println("---------" + table.Name + "---------")
+		PrintTable(1, *table)
+	}
+}
+
+func PrintRegion(indent int, region RegionMeta) {
+	fmt.Println(printIndent(indent) + "region ip:" + region.IP)
+	var state string
+	switch region.State {
+	case Working:
+		state = "working"
+	case Stop:
+		state = "stop"
+	}
+	fmt.Println(printIndent(indent) + "region state:" + state)
+}
+
+func PrintTable(indent int, table TableMeta) {
+	fmt.Println(printIndent(indent) + "Name:" + table.Name)
+	fmt.Println(printIndent(indent) + "Master:" + table.MasterRegion)
+	fmt.Println(printIndent(indent) + "SyncRegion:" + table.SyncRegion)
+	slaves := ""
+	for _, ip := range table.CopyRegions {
+		slaves += (ip + ",")
+	}
+	fmt.Println(printIndent(indent) + "SlaveRegions:" + slaves)
+}
+
+func printIndent(ind int) string {
+	res := ""
+	for i := 0; i < ind; i++ {
+		res += "  "
+	}
+	return res
+}

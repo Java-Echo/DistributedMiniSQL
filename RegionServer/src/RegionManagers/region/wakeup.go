@@ -89,6 +89,8 @@ func SendLocalTables(tableRoot string) {
 		tables = append(tables, table)
 	}
 	SendNewTables(tables)
+
+	global.PrintTableMap(1)
 }
 
 func SendNewTables(tables []rpc.LocalTable) {

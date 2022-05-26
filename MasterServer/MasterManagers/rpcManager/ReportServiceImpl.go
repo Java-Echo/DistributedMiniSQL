@@ -65,6 +65,9 @@ func (p *ReportService) ReportTable(request []LocalTable, reply *ReportTableRes)
 		table.Name = t.Name
 		reply.Tables = append(reply.Tables, table)
 	}
+
+	global.PrintTableMap(1)
+
 	return nil
 }
 
@@ -87,6 +90,7 @@ func (p *ReportService) AskSlave(request AskSlaveRst, reply *AskSlaveRes) error 
 	}
 
 	reply.State = "成功！"
+	global.PrintTableMap(1)
 	return nil
 }
 

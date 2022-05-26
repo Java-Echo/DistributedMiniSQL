@@ -50,6 +50,9 @@ func (p *RegionRegisterWorker) OnPut(event *clientv3.Event) {
 	// 写日志
 	log := mylog.NewNormalLog("服务器 " + ip + " 尝试建立连接")
 	log.LogGen(mylog.LogInputChan)
+
+	global.PrintRegionMap(1)
+	global.PrintTableMap(1)
 }
 
 func (p *RegionRegisterWorker) OnDelete(event *clientv3.Event) {
@@ -79,6 +82,8 @@ func (p *RegionRegisterWorker) OnDelete(event *clientv3.Event) {
 		}
 	}
 
+	global.PrintTableMap(1)
+
 	// 将该region服务器加入到暂存区
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(config.Configs.Etcd_region_stepout_time)*time.Second)
 	defer cancel()
@@ -97,6 +102,9 @@ func (p *RegionRegisterWorker) OnDelete(event *clientv3.Event) {
 
 	log_ = mylog.NewNormalLog("服务器 " + ip + " 加入到了暂存区")
 	log_.LogGen(mylog.LogInputChan)
+
+	global.PrintRegionMap(1)
+	global.PrintTableMap(1)
 }
 
 var _ WatchWorkerInterface = (*RegionRegisterWorker)(nil)
@@ -126,6 +134,8 @@ func (p *RegionStepOutWorker) OnDelete(event *clientv3.Event) {
 		log.LogGen(mylog.LogInputChan)
 	}
 
+	global.PrintRegionMap(1)
+	global.PrintTableMap(1)
 }
 
 var _ WatchWorkerInterface = (*RegionStepOutWorker)(nil)

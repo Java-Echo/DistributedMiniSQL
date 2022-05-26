@@ -1,6 +1,8 @@
 package global
 
 import (
+	"fmt"
+
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
@@ -28,3 +30,31 @@ var HostIP string                  // 本地的IP地址
 var AsyncLogSQLChan chan<- SQLLog  //全局的SQL异步备份管道
 var SQLInput chan string
 var SQLOutput chan string
+
+//==========工具函数==========
+func PrintTableMap(indent int) {
+	for _, table := range TableMap {
+		fmt.Println("---------" + table.Name + "---------")
+		PrintTableMeta(1, *table)
+	}
+}
+
+func PrintTableMeta(indent int, table TableMeta) {
+	fmt.Println(printIndent(indent) + "Name:" + table.Name)
+	fmt.Println(printIndent(indent) + "Level:" + table.Level)
+	fmt.Println(printIndent(indent) + "State:" + table.State)
+	fmt.Println(printIndent(indent) + "SyncRegion:" + table.SyncRegion)
+	slaves := ""
+	for _, ip := range table.CopyRegions {
+		slaves += (ip + ",")
+	}
+	fmt.Println(printIndent(indent) + "SlaveRegions:" + slaves)
+}
+
+func printIndent(ind int) string {
+	res := ""
+	for i := 0; i < ind; i++ {
+		res += "  "
+	}
+	return res
+}
