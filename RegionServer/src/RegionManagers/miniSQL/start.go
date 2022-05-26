@@ -104,10 +104,6 @@ func runShell(r chan<- error, in chan string, out chan string) {
 		_ = file.Close()
 	}()
 	// s := bufio.NewScanner(file)
-<<<<<<< HEAD
-	fmt.Println("damn it")
-=======
->>>>>>> 4b2f89c8a61a674770944546357c75238033324b
 	// for s.Scan() {
 	// 	//fmt.Println(s.Text())
 	// 	ll.AppendHistory(s.Text())
@@ -128,18 +124,6 @@ func runShell(r chan<- error, in chan string, out chan string) {
 		// 	var input string
 		var err error
 		for { //each line
-<<<<<<< HEAD
-			// 		if beginSQLParse {
-			// 			input, err = ll.Prompt(secondPrompt)
-			// 		} else {
-			// 			input, err = ll.Prompt(firstPrompt)
-			// 		}
-			// 		if err != nil {
-			// 			if err == liner.ErrPromptAborted {
-			// 				goto LOOP
-			// 			}
-			// 		}
-=======
 			// if beginSQLParse {
 			// 	input, err = ll.Prompt(secondPrompt)
 			// } else {
@@ -150,7 +134,6 @@ func runShell(r chan<- error, in chan string, out chan string) {
 			// 		goto LOOP
 			// 	}
 			// }
->>>>>>> 4b2f89c8a61a674770944546357c75238033324b
 			// trimInput := readBuffer()
 			// t := <-in
 			fmt.Println("before channel")
