@@ -9,7 +9,6 @@ import (
 	config "region/utils/ConfigSystem"
 	mylog "region/utils/LogSystem"
 	"region/utils/global"
-	"strconv"
 )
 
 func main() {
@@ -27,8 +26,11 @@ func main() {
 	go miniSQL.Start(global.SQLInput, global.SQLOutput)
 
 	// buildSQL()
+
 	global.SQLInput <- "use database aaa;"
+	fmt.Println(1)
 	res := <-global.SQLOutput
+	fmt.Println(2)
 	fmt.Println(res)
 
 	// 注册rpc服务
@@ -44,20 +46,20 @@ func main() {
 	}
 }
 
-func buildSQL() {
-	// global.SQLInput <- "create database aaa;"
-	// res := <-global.SQLOutput
-	// fmt.Println(res)
-	// time.Sleep(3 * time.Second)
-	fmt.Println(0)
-	fmt.Println("管道的内容数量为:" + strconv.Itoa(len(global.SQLInput)))
-	_, isOpen := <-global.SQLInput
-	if !isOpen {
-		fmt.Println("管道已被关闭")
-	}
-	global.SQLInput <- "use database aaa;"
-	fmt.Println(1)
-	res := <-global.SQLOutput
-	fmt.Println(2)
-	fmt.Println(res)
-}
+// func buildSQL() {
+// 	// global.SQLInput <- "create database aaa;"
+// 	// res := <-global.SQLOutput
+// 	// fmt.Println(res)
+// 	// time.Sleep(3 * time.Second)
+// 	fmt.Println(0)
+// 	fmt.Println("管道的内容数量为:" + strconv.Itoa(len(global.SQLInput)))
+// 	_, isOpen := <-global.SQLInput
+// 	if !isOpen {
+// 		fmt.Println("管道已被关闭")
+// 	}
+// 	global.SQLInput <- "use database aaa;"
+// 	fmt.Println(1)
+// 	res := <-global.SQLOutput
+// 	fmt.Println(2)
+// 	fmt.Println(res)
+// }
