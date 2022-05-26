@@ -1,7 +1,6 @@
 package miniSQL
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -104,11 +103,12 @@ func runShell(r chan<- error, in chan string, out chan string) {
 		}
 		_ = file.Close()
 	}()
-	s := bufio.NewScanner(file)
-	for s.Scan() {
-		//fmt.Println(s.Text())
-		ll.AppendHistory(s.Text())
-	}
+	// s := bufio.NewScanner(file)
+	fmt.Println("damn it")
+	// for s.Scan() {
+	// 	//fmt.Println(s.Text())
+	// 	ll.AppendHistory(s.Text())
+	// }
 	InitDB()
 
 	StatementChannel := make(chan types.DStatements, 500)  //用于传输操作指令通道
@@ -119,31 +119,34 @@ func runShell(r chan<- error, in chan string, out chan string) {
 	var beginSQLParse = false
 	var sqlText = make([]byte, 0, 100)
 	for { //each sql
-	LOOP:
-		beginSQLParse = false
-		sqlText = sqlText[:0]
-		var input string
-		var err error
+		// LOOP:
+		// 	beginSQLParse = false
+		// 	sqlText = sqlText[:0]
+		// 	var input string
+		// 	var err error
 		for { //each line
-			if beginSQLParse {
-				input, err = ll.Prompt(secondPrompt)
-			} else {
-				input, err = ll.Prompt(firstPrompt)
-			}
-			if err != nil {
-				if err == liner.ErrPromptAborted {
-					goto LOOP
-				}
-			}
+			// 		if beginSQLParse {
+			// 			input, err = ll.Prompt(secondPrompt)
+			// 		} else {
+			// 			input, err = ll.Prompt(firstPrompt)
+			// 		}
+			// 		if err != nil {
+			// 			if err == liner.ErrPromptAborted {
+			// 				goto LOOP
+			// 			}
+			// 		}
 			// trimInput := readBuffer()
 			// t := <-in
+			fmt.Println("before channel")
+			fmt.Println(len(in))
 			trimInput := <-in
+			fmt.Println("tttt")
 			// trimInput := strings.TrimSpace(input) //get the input without front and backend space
 
 			//fmt.Println(trimInput)
 			//trimInput
 			if len(trimInput) != 0 {
-				ll.AppendHistory(input)
+				// ll.AppendHistory(input)
 				if !beginSQLParse && (trimInput == "quit" || strings.HasPrefix(trimInput, "quit;")) {
 					close(StatementChannel)
 					for _ = range FinishChannel {
