@@ -19,6 +19,7 @@ func Test_main(t *testing.T) {
 	// global.SQLInput <- "create database aaa;"
 	// res := <-global.SQLOutput
 	// fmt.Println(res)
+	fmt.Println("xyz")
 	global.SQLInput <- "use database aaa;"
 	res := <-global.SQLOutput
 	fmt.Println(res)

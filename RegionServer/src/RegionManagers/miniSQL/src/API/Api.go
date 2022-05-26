@@ -34,114 +34,114 @@ func HandleOneParse(dataChannel <-chan types.DStatements, stopChannel chan<- Err
 
 			err = CreateDatabaseAPI(statement.(types.CreateDatabaseStatement))
 			if err.Status != true {
-				fmt.Println(err.ErrorHint)
+				// fmt.Println(err.ErrorHint)
 				global.ResponseString <- "Fail"
 			} else {
-				fmt.Println("create datbase success.")
+				// fmt.Println("create datbase success.")
 				global.ResponseString <- "Succeed"
 			}
 
 		case types.UseDatabase:
 			err = UseDatabaseAPI(statement.(types.UseDatabaseStatement))
 			if err.Status != true {
-				fmt.Println(err.ErrorHint)
+				// fmt.Println(err.ErrorHint)
 				global.ResponseString <- "Fail"
 
 			} else {
-				fmt.Printf("now you are using database.\n")
+				// fmt.Printf("now you are using database.\n")
 				global.ResponseString <- "Succeed"
 			}
 
 		case types.CreateTable:
 			err = CreateTableAPI(statement.(types.CreateTableStatement))
 			if err.Status != true {
-				fmt.Println(err.ErrorHint)
+				// fmt.Println(err.ErrorHint)
 				global.ResponseString <- "Fail"
 
 			} else {
-				fmt.Printf("create table success.\n")
+				// fmt.Printf("create table success.\n")
 				global.ResponseString <- "Succeed"
 			}
 
 		case types.CreateIndex:
 			err = CreateIndexAPI(statement.(types.CreateIndexStatement))
 			if err.Status != true {
-				fmt.Println(err.ErrorHint)
+				// fmt.Println(err.ErrorHint)
 				global.ResponseString <- "Fail"
 
 			} else {
-				fmt.Printf("create index succes.\n")
+				// fmt.Printf("create index succes.\n")
 				global.ResponseString <- "Succeed"
 			}
 		case types.DropTable:
 			err = DropTableAPI(statement.(types.DropTableStatement))
 			if err.Status != true {
-				fmt.Println(err.ErrorHint)
+				// fmt.Println(err.ErrorHint)
 				global.ResponseString <- "Fail"
 
 			} else {
-				fmt.Printf("drop table succes.\n")
+				// fmt.Printf("drop table succes.\n")
 				global.ResponseString <- "Succeed"
 			}
 
 		case types.DropIndex:
 			err = DropIndexAPI(statement.(types.DropIndexStatement))
 			if err.Status != true {
-				fmt.Println(err.ErrorHint)
+				// fmt.Println(err.ErrorHint)
 				global.ResponseString <- "Fail"
 
 			} else {
-				fmt.Printf("drop index succes.\n")
+				// fmt.Printf("drop index succes.\n")
 				global.ResponseString <- "Succeed"
 			}
 		case types.DropDatabase:
 			err = DropDatabaseAPI(statement.(types.DropDatabaseStatement))
 			if err.Status != true {
-				fmt.Println(err.ErrorHint)
+				// fmt.Println(err.ErrorHint)
 				global.ResponseString <- "Fail"
 
 			} else {
-				fmt.Printf("drop database succes.\n")
+				// fmt.Printf("drop database succes.\n")
 				global.ResponseString <- "Succeed"
 			}
 		case types.Insert:
 			err = InsertAPI(statement.(types.InsertStament))
 			if err.Status != true {
-				fmt.Println(err.ErrorHint)
+				// fmt.Println(err.ErrorHint)
 				global.ResponseString <- "Fail"
 
 			} else {
-				fmt.Printf("insert success, 1 row affected.\n")
+				// fmt.Printf("insert success, 1 row affected.\n")
 				global.ResponseString <- "Succeed"
 			}
 		case types.Update:
 			err = UpdateAPI(statement.(types.UpdateStament))
 			if err.Status != true {
-				fmt.Println(err.ErrorHint)
+				// fmt.Println(err.ErrorHint)
 				global.ResponseString <- "Fail"
 
 			} else {
-				fmt.Printf("update success, %d rows are updated.\n", err.Rows)
+				// fmt.Printf("update success, %d rows are updated.\n", err.Rows)
 				global.ResponseString <- "Succeed"
 			}
 		case types.Delete:
 			err = DeleteAPI(statement.(types.DeleteStatement))
 			if err.Status != true {
-				fmt.Println(err.ErrorHint)
+				// fmt.Println(err.ErrorHint)
 				global.ResponseString <- "Fail"
 
 			} else {
-				fmt.Printf("delete success, %d rows are deleted.\n", err.Rows)
+				// fmt.Printf("delete success, %d rows are deleted.\n", err.Rows)
 				global.ResponseString <- "Succeed"
 			}
 		case types.Select:
 			err = SelectAPI(statement.(types.SelectStatement))
 			if err.Status != true {
-				fmt.Println(err.ErrorHint)
+				// fmt.Println(err.ErrorHint)
 				global.ResponseString <- "Fail"
 
 			} else {
-				PrintTable(statement.(types.SelectStatement).TableNames[0], err.Data[err.Rows], err.Data[0:err.Rows]) //very dirty  but I have no other choose
+				// PrintTable(statement.(types.SelectStatement).TableNames[0], err.Data[err.Rows], err.Data[0:err.Rows]) //very dirty  but I have no other choose
 				var tmp string
 				tmp += statement.(types.SelectStatement).TableNames[0]
 				tmp += " "

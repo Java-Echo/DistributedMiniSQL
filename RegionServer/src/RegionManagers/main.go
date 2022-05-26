@@ -21,8 +21,8 @@ func main() {
 	global.TableMap = make(map[string]*global.TableMeta)
 	go etcd.ServiceRegister(global.Region)
 	// 开启本地的SQL服务
-	global.SQLInput = make(chan string, 1)
-	global.SQLOutput = make(chan string, 1)
+	global.SQLInput = make(chan string, 10)
+	global.SQLOutput = make(chan string, 10)
 	go miniSQL.Start(global.SQLInput, global.SQLOutput)
 
 	// buildSQL()
