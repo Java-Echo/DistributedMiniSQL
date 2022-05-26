@@ -16,7 +16,7 @@ func Test_parser(t *testing.T) {
 		"create table ttt;",
 	}
 	for i, sql := range testSQL {
-		s := parser(sql)
+		s, _ := parser(sql)
 		fmt.Println("-------测试第" + strconv.Itoa(i) + "条语句-------")
 		fmt.Println("SQL语句为:" + s.SQL)
 		fmt.Println("SQL的类型为:" + s.SQLtype)

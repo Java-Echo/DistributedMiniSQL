@@ -12,7 +12,7 @@ var client *CliServiceClient
 func TestMain(m *testing.M) {
 	mylog.LogInputChan = mylog.LogStart()
 	config.BuildConfig()
-	client, _ = DialService("tcp", "10.162.19.119:"+config.Configs.Region_port)
+	client, _ = DialService("tcp", "192.168.31.68:"+config.Configs.Region_port)
 	m.Run()
 }
 
