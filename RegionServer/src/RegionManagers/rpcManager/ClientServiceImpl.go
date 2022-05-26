@@ -70,6 +70,7 @@ func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
 			log_ := mylog.NewNormalLog("执行SQL语句 '" + request.SQL + "' 成功")
 			log_.LogType = "INFO"
 			log_.LogGen(mylog.LogInputChan)
+			return nil
 		} else {
 			reply.State = "fail"
 			log_ := mylog.NewNormalLog("执行SQL语句 '" + request.SQL + "' 失败")
@@ -77,7 +78,6 @@ func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
 			log_.LogGen(mylog.LogInputChan)
 			return nil
 		}
-		return nil
 	case "delete", "insert", "update":
 		// 首先检查本地是否有这张表，并查看该表的副本等级
 		if table.Level != "master" {
@@ -111,9 +111,27 @@ func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
 		// 成功返回
 		fmt.Println("对数据表的局部改动操作完成")
 		return nil
-	case "create_table", "delete_table":
-		// 首先在本地进行SQL的执行，得到执行结果
+	case "create_table":
+		// ToDo:尝试向master申请主副本
 
+		// 如果master成功返回，则在在本地进行SQL的执行，得到执行结果
+		res, success := MasterSQLTableCreate(request.SQL)
+		reply.Result = res
+		if success {
+			reply.State = "success"
+			log_ := mylog.NewNormalLog("执行SQL语句 '" + request.SQL + "' 成功")
+			log_.LogType = "INFO"
+			log_.LogGen(mylog.LogInputChan)
+			return nil
+		} else {
+			reply.State = "fail"
+			log_ := mylog.NewNormalLog("执行SQL语句 '" + request.SQL + "' 失败")
+			log_.LogType = "ERROR"
+			log_.LogGen(mylog.LogInputChan)
+			return nil
+		}
+	case "delete_table":
+		// 首先在本地进行SQL的执行，得到执行结果
 		// 本地创建成功，尝试向master申请主副本
 
 		fmt.Println("这个操作不得了，要对数据表整体改动")

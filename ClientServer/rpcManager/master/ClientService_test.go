@@ -29,7 +29,7 @@ func TestCliServiceClient_Hello(t *testing.T) {
 }
 func TestCliServiceClient_FetchTable(t *testing.T) {
 	var request string
-	request = "aaa"
+	request = "ttt"
 	var reply TableInfo
 	err := client.FetchTable(request, &reply)
 	if err != nil {

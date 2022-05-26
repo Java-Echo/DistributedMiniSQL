@@ -65,9 +65,9 @@ func ServiceRegister(client *clientv3.Client) {
 	}
 
 	for {
-		log := mylog.NewNormalLog("服务器" + global.HostIP + "尝试续约")
-		log.LogType = "INFO"
-		log.LogGen(mylog.LogInputChan)
+		// log := mylog.NewNormalLog("服务器" + global.HostIP + "尝试续约")
+		// log.LogType = "INFO"
+		// log.LogGen(mylog.LogInputChan)
 		time.Sleep(1 * time.Second)
 		<-keepaliveResponseChan
 		// fmt.Println("ttl:", ka.TTL)

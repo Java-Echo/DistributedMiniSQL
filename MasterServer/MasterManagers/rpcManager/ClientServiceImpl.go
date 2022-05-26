@@ -3,6 +3,7 @@ package rpc
 import (
 	"log"
 	mylog "master/utils/LogSystem"
+	"master/utils/global"
 	"net"
 	"net/rpc"
 )
@@ -42,9 +43,14 @@ func (p *CliService) Hello(request string, reply *string) error {
 
 func (p *CliService) FetchTable(request string, reply *TableInfo) error {
 	// ToDo:尝试查表，并将相关的信息添加到TableInfo中
-	reply.Master = Region{"master的IP地址"}
-	reply.Sync_slave = Region{"sync_slave的IP地址"}
-	reply.Slaves = append(reply.Slaves, Region{"第一个异步从节点的IP地址"})
-	reply.Slaves = append(reply.Slaves, Region{"第二个异步从节点的IP地址"})
+	table, ok := global.TableMap[request]
+	if ok {
+		// 此时本地能找到对应的数据表
+		reply.Master.IP = table.MasterRegion
+		reply.Sync_slave.IP = table.SyncRegion
+		for _, ip := range table.CopyRegions {
+			reply.Slaves = append(reply.Slaves, Region{IP: ip})
+		}
+	}
 	return nil
 }

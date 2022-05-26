@@ -11,4 +11,5 @@ type Config struct {
 	Rpc_R2C_port                 string
 	Etcd_table_catalog           string
 	Minisql_table_store          string
+	Minisql_database             string
 }

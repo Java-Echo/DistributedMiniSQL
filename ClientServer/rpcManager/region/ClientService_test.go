@@ -12,7 +12,7 @@ var client *CliServiceClient
 func TestMain(m *testing.M) {
 	mylog.LogInputChan = mylog.LogStart()
 	config.BuildConfig()
-	client, _ = DialService("tcp", "localhost:"+config.Configs.Region_port)
+	client, _ = DialService("tcp", "10.162.19.119:"+config.Configs.Region_port)
 	m.Run()
 }
 
@@ -29,9 +29,9 @@ func TestCliServiceClient_Hello(t *testing.T) {
 
 func TestCliServiceClient_SQL(t *testing.T) {
 	var request SQLRst
-	request.SQL = "select * from test1"
-	request.SQLtype = "insert"
-	request.Table = "test1"
+	request.SQL = "select * from ttt;"
+	request.SQLtype = "select"
+	request.Table = "ttt"
 	var reply SQLRes
 	err := client.SQL(request, &reply)
 	if err != nil {
