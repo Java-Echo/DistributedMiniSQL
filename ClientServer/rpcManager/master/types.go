@@ -10,3 +10,6 @@ type TableInfo struct {
 	Sync_slave Region   // 同步从副本所在的节点
 	Slaves     []Region // 异步从副本所在的节点
 }
+
+//========全局变量=========
+var RpcM2R *CliServiceClient

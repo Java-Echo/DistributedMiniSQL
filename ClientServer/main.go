@@ -1,11 +1,13 @@
 package main
 
 import (
+	masterRPC "client/rpcManager/master"
 	regionRPC "client/rpcManager/region"
 	config "client/utils/ConfigSystem"
 	mylog "client/utils/LogSystem"
 	"client/utils/global"
 	"fmt"
+	"log"
 	"strings"
 )
 
@@ -13,6 +15,8 @@ func main() {
 	mylog.LogInputChan = mylog.LogStart()
 	config.BuildConfig()
 	global.Master.IP = config.Configs.Master_ip
+	// 注册master端的rpc服务
+	masterRPC.RpcM2R, _ = masterRPC.DialService("tcp", config.Configs.Master_ip+":"+config.Configs.Master_port)
 	// ToDo:为客户端加入一张表，用来缓存用以沟通的数据表，其中相关的rpc连接要用的时候再去连
 }
 
@@ -67,17 +71,106 @@ func parser(input string) (regionRPC.SQLRst, bool) {
 }
 
 // 真正尝试运行SQL的程序
-func runSQL(input string) {
+func runSQL(input string) (string, error) {
 	// 1. 得到解析后的SQL内容
 	sqlRst, ok := parser(input)
 	if ok {
-		// 2. 尝试在本地查找相关的表
-		for _, table := range global.TableCache {
-			if table.Name == sqlRst.Table {
-				fmt.Println("table '" + table.Name + "' 在本地有缓存")
+		// 2. 此时SQL不会有问题，尝试在本地查找相关的表
+		var table global.TableMeta // 存储得到的表的信息
+		var inCache bool
+		table, inCache = global.TableCache[sqlRst.Table]
+		if !inCache {
+			// 此时table不在缓存中，我们需要向master询问
+			var reply masterRPC.TableInfo
+			masterRPC.RpcM2R.FetchTable(sqlRst.Table, &reply)
+			table.Master.IP = reply.Master.IP
+			table.Sync_slave.IP = reply.Sync_slave.IP
+			for _, slave := range reply.Slaves {
+				table.Slaves = append(table.Slaves, global.RegionInfo{IP: slave.IP})
 			}
+			// 将该表加入缓存
+			global.TableCache[sqlRst.Table] = table
+		}
+		// 3. 此时理论上我们已经获得了存储有这张表对应的region服务器
+		res, err := chooseRegionAndRun(sqlRst, table)
+		if err != nil {
+			return "", err
+		} else {
+			// 此时终于没有问题了
+			return res, nil
 		}
 	} else {
 		fmt.Println("错误的SQL语句")
+		return "", fmt.Errorf("错误的SQL语句")
+	}
+}
+
+// 尝试在当前保存的表的region信息中选择一个region服务器进行运行
+func chooseRegionAndRun(sql regionRPC.SQLRst, tableMeta global.TableMeta) (string, error) {
+	// 尝试一个个进行tableMeta进行尝试连接
+	if sql.SQLtype == "select" {
+		// 优先级①:尝试向slaves获取内容
+		for _, slave := range tableMeta.Slaves {
+			res, err := runOnRegion(sql, slave.IP)
+			if err == nil {
+				log_ := mylog.NewNormalLog("sql语句 '" + sql.SQL + "' 将在服务器 '" + slave.IP + "' 运行")
+				log_.LogType = "INFO"
+				log_.LogGen(mylog.LogInputChan)
+				return res, nil
+			}
+		}
+		// 优先级②:尝试向sync_slave获取内容
+		res, err := runOnRegion(sql, tableMeta.Sync_slave.IP)
+		if err == nil {
+			log_ := mylog.NewNormalLog("sql语句 '" + sql.SQL + "' 将在服务器 '" + tableMeta.Sync_slave.IP + "' 运行")
+			log_.LogType = "INFO"
+			log_.LogGen(mylog.LogInputChan)
+			return res, nil
+		}
+		// 优先级③:尝试向master获取内容
+		res, err = runOnRegion(sql, tableMeta.Master.IP)
+		if err == nil {
+			log_ := mylog.NewNormalLog("sql语句 '" + sql.SQL + "' 将在服务器 '" + tableMeta.Master.IP + "' 运行")
+			log_.LogType = "INFO"
+			log_.LogGen(mylog.LogInputChan)
+			return res, nil
+		}
+	} else {
+		// 此时只能够向master传递请求
+		res, err := runOnRegion(sql, tableMeta.Master.IP)
+		if err == nil {
+			log_ := mylog.NewNormalLog("sql语句 '" + sql.SQL + "' 将在服务器 '" + tableMeta.Master.IP + "' 运行")
+			log_.LogType = "INFO"
+			log_.LogGen(mylog.LogInputChan)
+			return res, nil
+		} else {
+			return "", err
+		}
+	}
+	return "", fmt.Errorf("当前缓冲中的所有region都无法访问")
+}
+
+// 尝试堆特定的IP地址进行特定的访问(已测试)
+func runOnRegion(sql regionRPC.SQLRst, clientIP string) (string, error) {
+	// 尝试联络
+	client, err := regionRPC.DialService("tcp", clientIP+":"+config.Configs.Region_port)
+	if err != nil {
+		return "", err
+	}
+
+	// 尝试传输sql的请求
+	var reply regionRPC.SQLRes
+	err = client.SQL(sql, &reply)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// 接受相关的请求
+	fmt.Println("SQL语句的执行状态为:" + reply.State)
+	fmt.Println("SQL语句的返回值为:" + reply.Result)
+	if reply.State == "fail" {
+		return reply.Result, fmt.Errorf("SQL执行失败")
+	} else {
+		return reply.Result, nil
 	}
 }

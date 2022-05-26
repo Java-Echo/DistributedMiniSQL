@@ -13,5 +13,5 @@ type TableMeta struct {
 }
 
 //==========client的全局数据==========
-var TableCache []TableMeta
+var TableCache map[string]TableMeta
 var Master RegionInfo

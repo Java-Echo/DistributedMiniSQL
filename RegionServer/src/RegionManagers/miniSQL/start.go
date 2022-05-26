@@ -120,9 +120,9 @@ func runShell(r chan<- error, in chan string, out chan string) {
 	for { //each sql
 		// LOOP:
 		// 	beginSQLParse = false
-		// 	sqlText = sqlText[:0]
+		sqlText = sqlText[:0]
 		// 	var input string
-		// 	var err error
+		var err error
 		for { //each line
 			// if beginSQLParse {
 			// 	input, err = ll.Prompt(secondPrompt)

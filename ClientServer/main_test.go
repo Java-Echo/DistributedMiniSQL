@@ -1,10 +1,24 @@
 package main
 
 import (
+	regionRPC "client/rpcManager/region"
+	config "client/utils/ConfigSystem"
+	mylog "client/utils/LogSystem"
+	"client/utils/global"
 	"fmt"
+	"log"
 	"strconv"
 	"testing"
 )
+
+func TestMain(m *testing.M) {
+	mylog.LogInputChan = mylog.LogStart()
+	config.BuildConfig()
+	// make一下哦
+	// global.TableCache
+	// client, _ = masterRpc.DialService("tcp", "localhost:"+config.Configs.Master_port)
+	m.Run()
+}
 
 func Test_parser(t *testing.T) {
 	testSQL := []string{
@@ -26,5 +40,60 @@ func Test_parser(t *testing.T) {
 	// fmt.Println(s.SQL)
 	// fmt.Println(s.SQLtype)
 	// fmt.Println(s.Table)
+	t.Error("终止")
+}
+
+func Test_runOnRegion(t *testing.T) {
+	sql := regionRPC.SQLRst{
+		SQLtype: "select",
+		SQL:     "select * from ttt;",
+		Table:   "ttt",
+	}
+	res, err := runOnRegion(sql, "127.0.0.1")
+	if err != nil {
+		log.Fatal("RunOnRegion error:", err)
+	}
+	fmt.Println("sql返回的结果为:" + res)
+	t.Error("终止")
+}
+
+// 尚未完成测试
+func Test_chooseRegionAndRun(t *testing.T) {
+	// SQL语句
+	sql := regionRPC.SQLRst{
+		SQLtype: "select",
+		SQL:     "select * from ttt;",
+		Table:   "ttt",
+	}
+
+	// tableMeta
+	meta := global.TableMeta{
+		Name:       "",
+		Master:     global.RegionInfo{IP: "127.0.0.1"},
+		Sync_slave: global.RegionInfo{IP: "127.0.0.1"},
+		Slaves: []global.RegionInfo{
+			global.RegionInfo{IP: "127.0.0.1"},
+			global.RegionInfo{IP: "127.0.0.1"},
+		},
+	}
+
+	// 测试运行
+	res, err := chooseRegionAndRun(sql, meta)
+	if err != nil {
+		log.Fatal("runSQL error:", err)
+	}
+	fmt.Println("sql语句查询的结果为:" + res)
+
+	t.Error("终止")
+}
+
+// 尚未完成测试
+func Test_runSQL(t *testing.T) {
+	sql := "select * from ttt;"
+	res, err := runSQL(sql)
+	if err != nil {
+		log.Fatal("runSQL error:", err)
+	}
+	fmt.Println("sql语句查询的结果为:" + res)
 	t.Error("终止")
 }
