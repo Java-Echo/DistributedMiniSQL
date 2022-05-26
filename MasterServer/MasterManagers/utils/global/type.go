@@ -37,6 +37,9 @@ var Master *clientv3.Client
 // =========测试函数=========
 
 func PrintRegionMap(indent int) {
+	if len(RegionMap) == 0 {
+		fmt.Println("本地注册的region服务器为空！")
+	}
 	for _, region := range RegionMap {
 		fmt.Println("------------------")
 		PrintRegion(1, *region)
@@ -44,6 +47,9 @@ func PrintRegionMap(indent int) {
 }
 
 func PrintTableMap(indent int) {
+	if len(TableMap) == 0 {
+		fmt.Println("本地的数据表为空！")
+	}
 	for _, table := range TableMap {
 		fmt.Println("---------" + table.Name + "---------")
 		PrintTable(1, *table)

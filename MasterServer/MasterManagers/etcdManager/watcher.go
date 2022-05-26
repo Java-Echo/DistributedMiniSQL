@@ -40,16 +40,24 @@ type RegionRegisterWorker struct {
 }
 
 func (p *RegionRegisterWorker) OnPut(event *clientv3.Event) {
-	// 为新加入的节点添加元信息
-	newMeta := &global.RegionMeta{}
 	ip := util_getLastKey(string(event.Kv.Key))
-	newMeta.IP = ip
-	newMeta.State = global.Working
-	// 将该节点加入到全局的表中
-	global.RegionMap[ip] = newMeta
-	// 写日志
-	log := mylog.NewNormalLog("服务器 " + ip + " 尝试建立连接")
-	log.LogGen(mylog.LogInputChan)
+	table, ok := global.RegionMap[ip]
+
+	if ok {
+		// 服务器是在一定时间里面宕机重启
+		log := mylog.NewNormalLog("服务器 " + ip + " 正在尝试宕机重启")
+		log.LogGen(mylog.LogInputChan)
+		table.State = global.Working
+	} else {
+		// 服务器是新加入的，为新加入的节点添加元信息
+		log := mylog.NewNormalLog("服务器 " + ip + " 尝试建立连接")
+		log.LogGen(mylog.LogInputChan)
+		newMeta := &global.RegionMeta{}
+		newMeta.IP = ip
+		newMeta.State = global.Working
+		// 将该节点加入到全局的表中
+		global.RegionMap[ip] = newMeta
+	}
 
 	global.PrintRegionMap(1)
 	global.PrintTableMap(1)
@@ -82,12 +90,10 @@ func (p *RegionRegisterWorker) OnDelete(event *clientv3.Event) {
 		}
 	}
 
-	global.PrintTableMap(1)
-
 	// 将该region服务器加入到暂存区
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(config.Configs.Etcd_region_stepout_time)*time.Second)
 	defer cancel()
-	// 获取一个租约 有效期为60秒
+	// 获取一个租约
 	leaseGrant, err := global.Master.Grant(ctx, config.Configs.Etcd_region_stepout_time)
 	if err != nil {
 		log.Printf("put error %v", err)
@@ -129,6 +135,8 @@ func (p *RegionStepOutWorker) OnDelete(event *clientv3.Event) {
 	if regionMeta.State == global.Stop {
 		log := mylog.NewNormalLog("服务器 " + ip + " 完全失去联系, 正在尝试清除它的一切")
 		log.LogGen(mylog.LogInputChan)
+		// 从全局的region服务器表中删除
+		delete(global.RegionMap, regionMeta.IP)
 	} else if regionMeta.State == global.Working {
 		log := mylog.NewNormalLog("服务器 " + ip + " 宕机重启成功")
 		log.LogGen(mylog.LogInputChan)
