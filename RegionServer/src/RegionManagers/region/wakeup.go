@@ -11,33 +11,53 @@ import (
 	"strings"
 )
 
-// 在本地的主副本文件夹下面查找所有的表名
-func findMasterCopy(tableRoot string) []string {
+// // 在本地的主副本文件夹下面查找所有的表名
+// func findMasterCopy(tableRoot string) []string {
 
+// 	var files []string
+
+// 	root := tableRoot + "/Master"
+// 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+// 		// 不处理文件夹
+// 		if info.IsDir() {
+// 			return nil
+// 		}
+// 		// 将搜索到的文件名添加进来
+// 		files = append(files, info.Name())
+// 		return nil
+// 	})
+// 	if err != nil {
+// 		panic(err)
+// 	}
+
+// 	return files
+// }
+
+// // 在本地的从副本文件夹下面查找所有的表名
+// func findSlaveCopy(tableRoot string) []string {
+// 	var files []string
+
+// 	root := tableRoot + "/Slave"
+// 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+// 		// 不处理文件夹
+// 		if info.IsDir() {
+// 			return nil
+// 		}
+// 		// 将搜索到的文件名添加进来
+// 		files = append(files, info.Name())
+// 		return nil
+// 	})
+// 	if err != nil {
+// 		panic(err)
+// 	}
+
+// 	return files
+// }
+
+func findLocalTable(tableRoot string) []string {
 	var files []string
 
-	root := tableRoot + "/Master"
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		// 不处理文件夹
-		if info.IsDir() {
-			return nil
-		}
-		// 将搜索到的文件名添加进来
-		files = append(files, info.Name())
-		return nil
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	return files
-}
-
-// 在本地的从副本文件夹下面查找所有的表名
-func findSlaveCopy(tableRoot string) []string {
-	var files []string
-
-	root := tableRoot + "/Slave"
+	root := tableRoot
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		// 不处理文件夹
 		if info.IsDir() {
@@ -55,36 +75,28 @@ func findSlaveCopy(tableRoot string) []string {
 }
 
 // 完成分区服务器新建和重启的相关任务
-func SendNewTables(tableRoot string) {
-	// ToDo:扫描本地的表的存储的文件夹得到本地的文件
-	masterFiles := findMasterCopy(tableRoot)
-	slaveFiles := findSlaveCopy(tableRoot)
-	// ToDo:调用rpc接口进行发送
-	var reply rpc.ReportTableRes
-	var request []rpc.LocalTable
-	request = make([]rpc.LocalTable, 0)
+func SendLocalTables(tableRoot string) {
+	// 1.扫描本地的表的存储的文件夹得到本地的文件
+	masterFiles := findLocalTable(tableRoot)
+	// 2.
+	tables := make([]rpc.LocalTable, 0)
 	for _, file := range masterFiles {
 		table := rpc.LocalTable{}
 		table.Name = file
 		table.IP = global.HostIP
 		table.Port = config.Configs.Rpc_R2R_port
 		table.Level = "master"
-		request = append(request, table)
+		tables = append(tables, table)
 	}
-	for _, file := range slaveFiles {
-		table := rpc.LocalTable{}
-		table.Name = file
-		table.IP = global.HostIP
-		table.Port = config.Configs.Rpc_R2R_port
-		table.Level = "slave"
-		request = append(request, table)
-	}
-	err := rpc.RpcM2R.ReportTable(request, &reply)
+	SendNewTables(tables)
+}
+
+func SendNewTables(tables []rpc.LocalTable) {
+	var reply rpc.ReportTableRes
+	err := rpc.RpcM2R.ReportTable(tables, &reply)
 	if err != nil {
 		log.Fatal(err)
 	}
-	// ToDo:对rpc的返回值进行处理，建立本地的数据表
-	// fmt.Println("本次返回的数组长度为:" + strconv.Itoa(len(reply.Tables)))
 	for _, table := range reply.Tables {
 		meta := &global.TableMeta{}
 		meta.Level = table.Level
@@ -99,8 +111,6 @@ func SendNewTables(tableRoot string) {
 			// ToDo:第一次遍历这个目录检查从副本数量，一旦数量不够，就向master索取
 			syncNeed, slaveNeed := CheckSlave(*meta)
 			GetSlave(meta.Name, syncNeed, slaveNeed)
-		} else if table.Level == "slave" {
-
 		}
 	}
 }

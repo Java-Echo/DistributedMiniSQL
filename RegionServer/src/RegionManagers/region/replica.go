@@ -162,6 +162,7 @@ func getTableFile(tableName string) []byte {
 }
 
 func passTable(dstIP string, tableName string) {
+	fmt.Println("有被调用到！")
 	client, err := rpc.DialGossipService("tcp", dstIP+":"+config.Configs.Rpc_R2R_port)
 	if err != nil {
 		log.Fatal("dialing:", err)
@@ -172,7 +173,9 @@ func passTable(dstIP string, tableName string) {
 		Content:   getTableFile(tableName),
 		TableName: tableName,
 	}
+	fmt.Println("已经做好了传输的准备")
 	err_ := client.PassTable(request, &reply)
+	fmt.Println("甚至成功返回了！")
 	if err_ != nil {
 		log.Fatal(err)
 	} else {

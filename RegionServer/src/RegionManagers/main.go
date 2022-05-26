@@ -25,7 +25,7 @@ func main() {
 	rpc.RpcM2R, _ = rpc.DialReportService("tcp", global.MasterIP+":"+config.Configs.Rpc_M2R_port)
 
 	// 向master报告本地的表
-	regionWorker.SendNewTables("./Tables")
+	regionWorker.SendLocalTables("./Tables")
 	// 发布rpc服务
 	go rpc.StartCliService(config.Configs.Rpc_R2C_port)
 	go rpc.StartGossipService(config.Configs.Rpc_R2R_port)
