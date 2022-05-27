@@ -59,6 +59,8 @@ func (p *GossipService) PassTable(request PassTableRst, reply *PassTableRes) err
 	meta.Name = tableName
 	meta.Level = "slave"
 	meta.WriteLock = make(chan int, 1)
+	// 将该信息添加到本地的表中
+	global.TableMap[meta.Name] = meta
 
 	// 2. 首先接受整个表文件
 	file, err := os.Create(tableName + "_log")
