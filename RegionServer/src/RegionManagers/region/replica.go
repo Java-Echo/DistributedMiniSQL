@@ -43,18 +43,18 @@ import (
 // }
 
 // ToDo:异步同步的日志管道处理
-func StartAsyncCopy() chan<- global.SQLLog {
+func StartAsyncCopy() chan global.SQLLog {
 	// 这个是需要绑定在全局的
-	input := make(chan global.SQLLog)
+	input := make(chan global.SQLLog, 100)
 	go func() {
 		for {
 			log := <-input
-			table := global.TableMap[log.Table]
+			// table := global.TableMap[log.Table]
 			// 尝试获得写锁
-			<-table.WriteLock
+			// <-table.WriteLock
 			fmt.Println("得到了表 '" + log.Table + "' 的写锁")
 			rpc.MasterSQLChange(rpc.SQLRst{SQLtype: log.SQLtype, SQL: log.SQL, Table: log.Table})
-			fmt.Println("成功执行了从副本同步：'" + log.SQL + "' ")
+			fmt.Println("成功执行了异步从副本的同步：'" + log.SQL + "' ")
 		}
 	}()
 	log_ := mylog.NewNormalLog("开启了全局异步SQL日志的复制")

@@ -28,8 +28,9 @@ func Test_main(t *testing.T) {
 	fmt.Println(res)
 
 	// 创建数据表
-	tableName := "ttt"
+	// tableName := "ttt"
 	// tableName := "bbb"
+	tableName := "wrd"
 	rpc.MasterSQLTableCreate(rpc.SQLRst{SQLtype: "create_table", SQL: "create table " + tableName + "(id int);", Table: tableName})
 	// 插入数据
 	rpc.MasterSQLChange(rpc.SQLRst{SQLtype: "insert", SQL: "insert into " + tableName + " values(1);", Table: tableName})

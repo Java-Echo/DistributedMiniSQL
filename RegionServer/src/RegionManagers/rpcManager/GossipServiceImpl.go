@@ -81,7 +81,8 @@ func (p *GossipService) PassTable(request PassTableRst, reply *PassTableRes) err
 		if c == io.EOF {
 			break
 		}
-		NormalSQL(string(sqlLine))
+		res := NormalSQL(string(sqlLine))
+		fmt.Println("日志读取的结果为:" + res)
 	}
 
 	// 4. 创建成功

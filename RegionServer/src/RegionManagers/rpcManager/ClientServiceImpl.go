@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"net/rpc"
+	etcd "region/etcdManager"
 	config "region/utils/ConfigSystem"
 	mylog "region/utils/LogSystem"
 	"region/utils/global"
@@ -129,7 +130,7 @@ func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
 		return nil
 	case "create_table":
 		// ToDo:尝试向master申请主副本
-
+		// SendNewTable()
 		// 如果master成功返回，则在在本地进行SQL的执行，得到执行结果
 		res, success := MasterSQLTableCreate(request)
 		reply.Result = res
@@ -157,4 +158,32 @@ func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
 	reply.Result = "什么都没有查到哦"
 	reply.State = "成功"
 	return nil
+}
+
+func SendNewTable(table LocalTable) bool {
+	isAccept := false
+	var reply ReportTableRes
+	err := RpcM2R.ReportTable([]LocalTable{table}, &reply)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, table := range reply.Tables {
+		meta := &global.TableMeta{}
+		meta.Level = table.Level
+		meta.Name = table.Name
+		if table.Level == "master" {
+			fmt.Println("新建的表 '" + table.Name + "' 被成功接受了")
+			isAccept = true
+			// 建立这个表的其他元信息
+			catalog := config.Configs.Etcd_table_catalog + "/" + table.Name + "/"
+			meta.TableWatcher = etcd.GetWatcher(global.Region, catalog)
+			global.TableMap[meta.Name] = meta
+			// ToDo:完善对于主副本建立监听机制
+			go StartWatchTable(meta)
+			// ToDo:第一次遍历这个目录检查从副本数量，一旦数量不够，就向master索取
+			syncNeed, slaveNeed := CheckSlave(*meta)
+			GetSlave(meta.Name, syncNeed, slaveNeed)
+		}
+	}
+	return isAccept
 }

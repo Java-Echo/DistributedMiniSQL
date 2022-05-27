@@ -18,6 +18,15 @@ func main() {
 	// 注册master端的rpc服务
 	masterRPC.RpcM2R, _ = masterRPC.DialService("tcp", config.Configs.Master_ip+":"+config.Configs.Master_port)
 	// ToDo:为客户端加入一张表，用来缓存用以沟通的数据表，其中相关的rpc连接要用的时候再去连
+
+	for {
+		var sql string
+		fmt.Print("sql>>>")
+		fmt.Scanln(&sql)
+		res, _ := runSQL(sql)
+		fmt.Println(res)
+	}
+
 }
 
 // ToDo:直接返回一个查询体，主要需要解析出来 ①查询的table名称 ②执行的操作类型

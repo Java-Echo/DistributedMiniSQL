@@ -72,3 +72,12 @@ func TestMasterSQLChange(t *testing.T) {
 	time.Sleep(1 * time.Second)
 	t.Error("终止")
 }
+
+func TestMasterSQLTableDelete(t *testing.T) {
+	res, ok := MasterSQLChange(SQLRst{SQLtype: "insert", SQL: "insert into cyy values(6);", Table: "cyy"})
+	if ok {
+		fmt.Println("表项插入的结果为:" + res)
+	} else {
+		fmt.Println("错误")
+	}
+}
