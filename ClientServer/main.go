@@ -43,7 +43,6 @@ func main() {
 		res, _ := runSQL(strings.TrimSpace(input))
 		fmt.Println("res>>>" + res)
 	}
-
 }
 
 // ToDo:直接返回一个查询体，主要需要解析出来 ①查询的table名称 ②执行的操作类型
