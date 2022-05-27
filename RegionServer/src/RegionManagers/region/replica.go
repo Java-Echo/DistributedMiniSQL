@@ -59,7 +59,7 @@ func StartAsyncCopy() chan<- global.SQLLog {
 			// 尝试获得写锁
 			<-table.WriteLock
 			fmt.Println("得到了表 '" + log.Table + "' 的写锁")
-			rpc.SQLChange(log.SQL)
+			rpc.SQLChange(rpc.SQLRst{SQLtype: log.SQLtype, SQL: log.SQL, Table: log.Table})
 			fmt.Println("成功执行了从副本同步：'" + log.SQL + "' ")
 		}
 	}()
