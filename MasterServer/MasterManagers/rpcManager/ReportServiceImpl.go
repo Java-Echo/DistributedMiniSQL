@@ -122,7 +122,7 @@ func selectRegion(n int, source []string) []string {
 				break
 			}
 		}
-		if !inSource {
+		if !inSource && global.RegionMap[ip].State != global.Stop {
 			res = append(res, ip)
 			num++
 		}

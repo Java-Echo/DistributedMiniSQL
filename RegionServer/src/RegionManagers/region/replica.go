@@ -2,10 +2,7 @@ package regionWorker
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
 	rpc "region/rpcManager"
-	config "region/utils/ConfigSystem"
 	mylog "region/utils/LogSystem"
 	"region/utils/global"
 )
@@ -173,34 +170,34 @@ func StartAsyncCopy() chan<- global.SQLLog {
 // 	}
 // }
 
-// ToDo:得到对应的表的内容
-func getTableFile(tableName string) []byte {
-	logFile, err := ioutil.ReadFile(tableName + "_log")
-	if err != nil {
-		fmt.Println("read fail", err)
-	}
-	return logFile
-}
+// // ToDo:得到对应的表的内容
+// func getTableFile(tableName string) []byte {
+// 	logFile, err := ioutil.ReadFile(tableName + "_log")
+// 	if err != nil {
+// 		fmt.Println("read fail", err)
+// 	}
+// 	return logFile
+// }
 
-func passTable(dstIP string, tableName string) {
-	fmt.Println("有被调用到！")
-	client, err := rpc.DialGossipService("tcp", dstIP+":"+config.Configs.Rpc_R2R_port)
-	if err != nil {
-		log.Fatal("dialing:", err)
-	}
-	// 这里需要得到本地表格的byte数组
-	var reply rpc.PassTableRes
-	request := rpc.PassTableRst{
-		Content:   getTableFile(tableName),
-		TableName: tableName,
-	}
-	fmt.Println("已经做好了传输的准备")
-	err_ := client.PassTable(request, &reply)
-	fmt.Println("甚至成功返回了！")
-	if err_ != nil {
-		log.Fatal(err)
-	} else {
-		log_ := mylog.NewNormalLog("表 '" + tableName + "' 针对 '" + dstIP + "' 服务器的快照传输完成")
-		log_.LogGen(mylog.LogInputChan)
-	}
-}
+// func passTable(dstIP string, tableName string) {
+// 	fmt.Println("有被调用到！")
+// 	client, err := rpc.DialGossipService("tcp", dstIP+":"+config.Configs.Rpc_R2R_port)
+// 	if err != nil {
+// 		log.Fatal("dialing:", err)
+// 	}
+// 	// 这里需要得到本地表格的byte数组
+// 	var reply rpc.PassTableRes
+// 	request := rpc.PassTableRst{
+// 		Content:   getTableFile(tableName),
+// 		TableName: tableName,
+// 	}
+// 	fmt.Println("已经做好了传输的准备")
+// 	err_ := client.PassTable(request, &reply)
+// 	fmt.Println("甚至成功返回了！")
+// 	if err_ != nil {
+// 		log.Fatal(err)
+// 	} else {
+// 		log_ := mylog.NewNormalLog("表 '" + tableName + "' 针对 '" + dstIP + "' 服务器的快照传输完成")
+// 		log_.LogGen(mylog.LogInputChan)
+// 	}
+// }
