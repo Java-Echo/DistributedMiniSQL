@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"net/rpc"
+	config "region/utils/ConfigSystem"
 	mylog "region/utils/LogSystem"
 	"region/utils/global"
 )
@@ -79,13 +80,13 @@ func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
 			return nil
 		}
 	case "delete", "insert", "update":
-		// 首先检查本地是否有这张表，并查看该表的副本等级
+		// 1. 首先检查本地是否有这张表，并查看该表的副本等级
 		if table.Level != "master" {
 			reply.State = "error"
 			reply.Result = "分区服务器 '" + global.HostIP + "' 并不是表 '" + request.Table + "' 的主副本"
 			return nil
 		}
-		// 尝试在本地完成修改
+		// 2. 尝试在本地完成修改
 		_, ok := MasterSQLChange(request)
 		if ok {
 			log_ := mylog.NewNormalLog("执行SQL语句 '" + request.SQL + "' 成功")
@@ -104,6 +105,15 @@ func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
 		// ToDo:尝试将相关信息存储到异步从副本当中
 		for _, ip := range table.CopyRegions {
 			fmt.Println("这里需要对 '" + ip + "' 进行异步修改")
+			client, err := DialGossipService("tcp", ip+":"+config.Configs.Rpc_R2R_port)
+			if err != nil {
+				log.Fatal("dialing:", err)
+			}
+			var reply PassLogRes
+			err = client.PassLog(PassLogRst{SqlType: request.SQLtype, Sql: request.SQL, Table: request.Table}, &reply)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 		// 添加返回值信息
 		reply.State = "success"

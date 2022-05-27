@@ -33,6 +33,7 @@ func RegisterGossipService(svc GossipServiceInterface) error {
 type GossipServiceInterface = interface {
 	PassTable(request PassTableRst, reply *PassTableRes) error
 	PassLog(request PassLogRst, reply *PassLogRes) error
+	SyncSQL(request SQLRst, reply SQLRes) error
 	// ToDo:可以定义更多的函数
 }
 
@@ -44,4 +45,8 @@ func (p *GossipServiceClient) PassLog(request PassLogRst, reply *PassLogRes) err
 // 传递一个表的文件
 func (p *GossipServiceClient) PassTable(request PassTableRst, reply *PassTableRes) error {
 	return p.Client.Call(GossipServiceName+".PassTable", request, reply)
+}
+
+func (p *GossipServiceClient) SyncSQL(request SQLRst, reply SQLRes) error {
+	return p.Client.Call(GossipServiceName+".SyncSQL", request, reply)
 }

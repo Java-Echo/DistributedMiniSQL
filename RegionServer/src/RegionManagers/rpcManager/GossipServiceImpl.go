@@ -79,15 +79,20 @@ func (p *GossipService) PassTable(request PassTableRst, reply *PassTableRes) err
 		}
 		NormalSQL(string(sqlLine))
 	}
+
 	// 4. 创建成功
 	log_ := mylog.NewNormalLog("创建表 '" + tableName + "' 的备份成功")
 	log_.LogType = "INFO"
 	log_.LogGen(mylog.LogInputChan)
 
-	// 3. 归还写锁(其实本来是没有的)
+	// 5. 归还写锁(其实本来是没有的)
 	meta.WriteLock <- 1
 	fmt.Println("归还写锁")
 
 	// 要不要开启一些channel之类的？
+	return nil
+}
+
+func (p *GossipService) SyncSQL(request SQLRst, reply SQLRes) error {
 	return nil
 }
