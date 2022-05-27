@@ -42,7 +42,8 @@ func GetSlave(tableName string, syncNeed int, slaveNeed int) {
 	request := AskSlaveRst{
 		TableName:    tableName,
 		SyncSlaveNum: syncNeed,
-		SlaveNum:     slaveNeed,
+		// 限定为单个同步从副本
+		SlaveNum: 0,
 	}
 	var reply AskSlaveRes
 	RpcM2R.AskSlave(request, &reply)
