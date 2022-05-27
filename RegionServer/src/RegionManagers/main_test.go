@@ -36,5 +36,9 @@ func Test_main(t *testing.T) {
 	rpc.MasterSQLChange(rpc.SQLRst{SQLtype: "insert", SQL: "insert into " + tableName + " values(2);", Table: tableName})
 	rpc.MasterSQLChange(rpc.SQLRst{SQLtype: "insert", SQL: "insert into " + tableName + " values(3);", Table: tableName})
 
+	// 尝试建立查询
+	sqlRes, _ := rpc.MasterSQLSelect(rpc.SQLRst{SQLtype: "select", SQL: "select * from " + tableName + ";"})
+	fmt.Println("sql的返回结果为:" + sqlRes)
+
 	t.Error("终止")
 }

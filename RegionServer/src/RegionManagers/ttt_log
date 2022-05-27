@@ -3,3 +3,6 @@ create table ttt(id int);
 insert into ttt values(1);
 insert into ttt values(2);
 insert into ttt values(3);
+insert into ttt values(1);
+insert into ttt values(2);
+insert into ttt values(3);
