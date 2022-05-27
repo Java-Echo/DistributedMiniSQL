@@ -20,10 +20,10 @@ func RegisterWatcherWithWorker(client *clientv3.Client, catalog string, worker W
 
 	for watchResponse := range watchChan {
 		for _, event := range watchResponse.Events {
-			fmt.Printf("Type:%s,Key:%s,Value:%s\n", event.Type, event.Kv.Key, event.Kv.Value)
-			if event.Type == 0 {
+			// fmt.Printf("Type:%s,Key:%s,Value:%s\n", event.Type, event.Kv.Key, event.Kv.Value)
+			if event.Type == clientv3.EventTypePut {
 				worker.OnPut(event)
-			} else if event.Type == 1 {
+			} else if event.Type == clientv3.EventTypeDelete {
 				worker.OnDelete(event)
 			}
 		}
@@ -45,9 +45,15 @@ func (p *RegionRegisterWorker) OnPut(event *clientv3.Event) {
 
 	if ok {
 		// 服务器是在一定时间里面宕机重启
-		log := mylog.NewNormalLog("服务器 " + ip + " 正在尝试宕机重启")
-		log.LogGen(mylog.LogInputChan)
-		table.State = global.Working
+		if table.State == global.Stop {
+			log := mylog.NewNormalLog("服务器 " + ip + " 正在尝试宕机重启")
+			log.LogGen(mylog.LogInputChan)
+			table.State = global.Working
+
+			global.PrintRegionMap(1)
+			global.PrintTableMap(1)
+		}
+		// 如果不是的话，那就是服务器在尝试续约
 	} else {
 		// 服务器是新加入的，为新加入的节点添加元信息
 		log := mylog.NewNormalLog("服务器 " + ip + " 尝试建立连接")
@@ -57,13 +63,14 @@ func (p *RegionRegisterWorker) OnPut(event *clientv3.Event) {
 		newMeta.State = global.Working
 		// 将该节点加入到全局的表中
 		global.RegionMap[ip] = newMeta
-	}
 
-	global.PrintRegionMap(1)
-	global.PrintTableMap(1)
+		global.PrintRegionMap(1)
+		global.PrintTableMap(1)
+	}
 }
 
 func (p *RegionRegisterWorker) OnDelete(event *clientv3.Event) {
+	fmt.Printf("Type:%s,Key:%s,Value:%s\n", event.Type, event.Kv.Key, event.Kv.Value)
 	ip := util_getLastKey(string(event.Kv.Key))
 
 	log_ := mylog.NewNormalLog("服务器 " + ip + " 失去连接")
@@ -121,12 +128,15 @@ type RegionStepOutWorker struct {
 
 // ToDo:这里的逻辑是不完善的
 func (p *RegionStepOutWorker) OnPut(event *clientv3.Event) {
+	fmt.Printf("Type:%s,Key:%s,Value:%s\n", event.Type, event.Kv.Key, event.Kv.Value)
 	ip := util_getLastKey(string(event.Kv.Key))
 
 	log := mylog.NewNormalLog("服务器 " + ip + " 进入“暂时失联”状态")
 	log.LogGen(mylog.LogInputChan)
 }
+
 func (p *RegionStepOutWorker) OnDelete(event *clientv3.Event) {
+	fmt.Printf("Type:%s,Key:%s,Value:%s\n", event.Type, event.Kv.Key, event.Kv.Value)
 	ip := util_getLastKey(string(event.Kv.Key))
 	log := mylog.NewNormalLog("服务器 " + ip + " 离开“暂时失联”状态")
 	log.LogGen(mylog.LogInputChan)

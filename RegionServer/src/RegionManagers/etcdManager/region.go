@@ -35,12 +35,12 @@ func Init() *clientv3.Client {
 
 // 向etcd注册自己
 func ServiceRegister(client *clientv3.Client) {
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10000*time.Second)
 	defer cancel()
 
 	// 尝试注册一个新的租约
-	// 获取一个租约 有效期为5秒
-	leaseGrant, err := client.Grant(ctx, 5)
+	// 获取一个租约 有效期为6秒
+	leaseGrant, err := client.Grant(ctx, 6)
 	if err != nil {
 		log.Printf("put error %v", err)
 		return
@@ -52,26 +52,45 @@ func ServiceRegister(client *clientv3.Client) {
 		return
 	}
 
-	// 发送心跳包，不断续约
-	keepaliveResponseChan, err := client.KeepAlive(ctx, leaseGrant.ID)
-	if err != nil {
-		log.Printf("KeepAlive error %v", err)
-		return
+	// 使用定时器来完成续约
+	ticker := time.NewTicker(2 * time.Second)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		// 重新获得一个租约
+		leaseGrant, err := client.Grant(ctx, 6)
+		if err != nil {
+			log.Printf("put error %v", err)
+			return
+		}
+		// 尝试续约
+		_, err = client.Put(ctx, config.Configs.Etcd_region_register_catalog+"/"+global.HostIP, "", clientv3.WithLease(leaseGrant.ID))
+		if err != nil {
+			log.Printf("put error %v", err)
+			return
+		}
 	}
 
-	if err != nil {
-		log.Printf("KeepAlive error %v", err)
-		return
-	}
+	// // 发送心跳包，不断续约
+	// keepaliveResponseChan, err := client.KeepAlive(ctx, leaseGrant.ID)
+	// if err != nil {
+	// 	log.Printf("KeepAlive error %v", err)
+	// 	return
+	// }
 
-	for {
-		// log := mylog.NewNormalLog("服务器" + global.HostIP + "尝试续约")
-		// log.LogType = "INFO"
-		// log.LogGen(mylog.LogInputChan)
-		time.Sleep(1 * time.Second)
-		<-keepaliveResponseChan
-		// fmt.Println("ttl:", ka.TTL)
-	}
+	// if err != nil {
+	// 	log.Printf("KeepAlive error %v", err)
+	// 	return
+	// }
+
+	// for {
+	// 	// log := mylog.NewNormalLog("服务器" + global.HostIP + "尝试续约")
+	// 	// log.LogType = "INFO"
+	// 	// log.LogGen(mylog.LogInputChan)
+	// 	time.Sleep(1 * time.Second)
+	// 	<-keepaliveResponseChan
+	// 	// fmt.Println("ttl:", ka.TTL)
+	// }
 }
 
 // 获取master的相关信息(返回 ip+port)

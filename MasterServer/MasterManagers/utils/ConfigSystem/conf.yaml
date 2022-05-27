@@ -5,4 +5,4 @@
   etcd_ip: 192.168.31.68  #etcd服务器所在的ip地址
   etcd_port: 2379 #etcd服务器所在的端口
   etcd_region_stepout_catalog: /stepoutServer #暂时离开的server的目录
-  etcd_region_stepout_time: 10 #最长能够等待的服务器宕机重启时间
+  etcd_region_stepout_time: 60 #最长能够等待的服务器宕机重启时间
