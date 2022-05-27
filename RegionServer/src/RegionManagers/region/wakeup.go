@@ -63,6 +63,11 @@ func findLocalTable(tableRoot string) []string {
 		if info.IsDir() {
 			return nil
 		}
+		fileName := info.Name()
+		prefix := "_list"
+		if len(fileName) >= len(prefix) && fileName[len(fileName)-len(prefix):] == prefix {
+			return nil
+		}
 		// 将搜索到的文件名添加进来
 		files = append(files, info.Name())
 		return nil
