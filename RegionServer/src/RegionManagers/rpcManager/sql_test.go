@@ -17,11 +17,11 @@ func TestMain(m *testing.M) {
 	global.SQLOutput = make(chan string)
 	go miniSQL.Start(global.SQLInput, global.SQLOutput)
 
-	// global.SQLInput <- "create database aaa;"
-	// res := <-global.SQLOutput
-	// fmt.Println(res)
-	global.SQLInput <- "use database aaa;"
+	global.SQLInput <- "create database aaa;"
 	res := <-global.SQLOutput
+	fmt.Println(res)
+	global.SQLInput <- "use database aaa;"
+	res = <-global.SQLOutput
 	fmt.Println(res)
 	fmt.Println("初始化完成")
 
@@ -65,7 +65,7 @@ func TestMasterSQLChange(t *testing.T) {
 		SQL:     "insert into ttt values(3);",
 		Table:   "ttt",
 	}
-	res, ok := MasterSQLTableCreate(sql)
+	res, ok := MasterSQLChange(sql)
 	if ok {
 		fmt.Println("表项插入的结果为:" + res)
 	}

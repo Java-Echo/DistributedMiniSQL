@@ -1,6 +1,9 @@
 package rpc
 
 import (
+	"fmt"
+	"io"
+	"os"
 	"region/utils/global"
 )
 
@@ -16,10 +19,11 @@ func MasterSQLSelect(SQL SQLRst) (string, bool) {
 func MasterSQLChange(SQL SQLRst) (string, bool) {
 	global.SQLInput <- SQL.SQL
 	res := <-global.SQLOutput
-	// fmt.Println(res)
-	// if res == "success" {
-
-	// }
+	fmt.Println(res)
+	// SQL执行成功，尝试写日志
+	if res == "Succeed" {
+		writeSQLLog(SQL)
+	}
 	return res, true
 }
 
@@ -27,6 +31,11 @@ func MasterSQLChange(SQL SQLRst) (string, bool) {
 func MasterSQLTableCreate(SQL SQLRst) (string, bool) {
 	global.SQLInput <- SQL.SQL
 	res := <-global.SQLOutput
+	fmt.Println(res)
+	// SQL执行成功，尝试写日志
+	if res == "Succeed" {
+		writeSQLLog(SQL)
+	}
 	return res, true
 }
 
@@ -57,4 +66,34 @@ func SQLTableChange(SQL SQLRst) (string, bool) {
 	global.SQLInput <- SQL.SQL
 	res := <-global.SQLOutput
 	return res, true
+}
+
+// =======SQL的日志实现=======
+func writeSQLLog(SQL SQLRst) {
+	logName := SQL.Table + "_log"
+	var logFile *os.File
+	var err error
+	if _, err := os.Stat(logName); os.IsNotExist(err) {
+		// 这里理论上不应该创建一个文件，只有在create_table的时候才应该主动创建文件
+		logFile, err = os.Create(logName) //创建文件
+	} else {
+		logFile, err = os.OpenFile(logName, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
+		fmt.Println("文件存在")
+	}
+	defer logFile.Close()
+
+	if SQL.SQLtype == "insert" || SQL.SQLtype == "update" || SQL.SQLtype == "delete" {
+		// 写入日志
+		_, err = io.WriteString(logFile, SQL.SQL+"\n")
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	if SQL.SQLtype == "create_table" {
+		logFile, err = os.Create(logName) //创建文件
+		// 会优先清除本地的表
+		_, err = io.WriteString(logFile, "drop table "+SQL.Table+";"+"\n")
+		_, err = io.WriteString(logFile, SQL.SQL+"\n")
+	}
 }
