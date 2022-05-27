@@ -47,25 +47,12 @@ func MasterSQLTableDelete(SQL SQLRst) (string, bool) {
 }
 
 /*--------------常规的SQL操作--------------*/
-// ToDo:查询语句
-func SQLSelect(SQL SQLRst) (string, bool) {
-	global.SQLInput <- SQL.SQL
+// 所有的SQL语句都能执行，适用于日志的读取
+func NormalSQL(sql string) string {
+	fmt.Println("将要执行的SQL语句为:" + sql)
+	global.SQLInput <- sql
 	res := <-global.SQLOutput
-	return res, true
-}
-
-// ToDo:对部分表项的修改
-func SQLChange(SQL SQLRst) (string, bool) {
-	global.SQLInput <- SQL.SQL
-	res := <-global.SQLOutput
-	return res, true
-}
-
-// ToDo:对数据表的增加或者删除
-func SQLTableChange(SQL SQLRst) (string, bool) {
-	global.SQLInput <- SQL.SQL
-	res := <-global.SQLOutput
-	return res, true
+	return res
 }
 
 // =======SQL的日志实现=======

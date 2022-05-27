@@ -63,7 +63,7 @@ func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
 	case "select":
 		// 检查这张表的版本是否有问题(暂时先不做)
 		// 调用sql的查询
-		res, success := SQLSelect(request)
+		res, success := MasterSQLSelect(request)
 		reply.Result = res
 		if success {
 			reply.State = "success"

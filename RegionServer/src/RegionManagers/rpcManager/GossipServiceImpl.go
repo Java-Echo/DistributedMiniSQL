@@ -59,7 +59,7 @@ func (p *GossipService) PassTable(request PassTableRst, reply *PassTableRes) err
 	meta.WriteLock = make(chan int)
 
 	// 2. 首先接受整个表文件
-	file, err := os.Create(tableName)
+	file, err := os.Create(tableName + "_log11")
 	if err != nil {
 		log.Fatal("创建文件失败")
 	}
@@ -67,11 +67,23 @@ func (p *GossipService) PassTable(request PassTableRst, reply *PassTableRes) err
 		file.Close()
 	}()
 	file.Write(request.Content)
-	log_ := mylog.NewNormalLog("创建表 '" + tableName + "' 成功")
+
+	// 3. 尝试逐行读取其中的命令，然后执行SQL
+	// br := bufio.NewReader(file)
+	// for {
+	// 	sqlLine, _, c := br.ReadLine()
+	// 	if c == io.EOF {
+	// 		break
+	// 	}
+	// 	fmt.Println(string(sqlLine))
+	// 	// NormalSQL(string(sqlLine))
+	// }
+	// 4. 创建成功
+	log_ := mylog.NewNormalLog("创建表 '" + tableName + "' 的备份成功")
 	log_.LogType = "INFO"
 	log_.LogGen(mylog.LogInputChan)
 
-	// 3. 归还写锁
+	// 3. 归还写锁(其实本来是没有的)
 	meta.WriteLock <- 1
 	fmt.Println("归还写锁")
 
