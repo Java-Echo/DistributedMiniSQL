@@ -85,6 +85,15 @@ func (p *RegionRegisterWorker) OnDelete(event *clientv3.Event) {
 			DeleteMaster(table.Name, ip)
 			// ToDo:这里需要启用从副本来进行容错容灾
 			table.MasterRegion = ""
+			if table.SyncRegion != "" {
+				// 将同步从副本提升上来(尚未测试)
+				table.MasterRegion = table.SyncRegion
+				table.SyncRegion = ""
+				CreateMaster(table.Name, table.MasterRegion)
+				DeleteSyncSlave(table.Name, table.SyncRegion)
+			} else {
+				fmt.Println("主副本没了,也没有从副本,寄了")
+			}
 		} else if table.SyncRegion == ip {
 			DeleteSyncSlave(table.Name, ip)
 			table.SyncRegion = ""
