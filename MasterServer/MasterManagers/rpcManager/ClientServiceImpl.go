@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"fmt"
 	"log"
 	mylog "master/utils/LogSystem"
 	"master/utils/global"
@@ -51,6 +52,7 @@ func (p *CliService) FetchTable(request string, reply *TableInfo) error {
 		for _, ip := range table.CopyRegions {
 			reply.Slaves = append(reply.Slaves, Region{IP: ip})
 		}
+		return nil
 	}
-	return nil
+	return fmt.Errorf("集群中未找到表 '" + request + "'")
 }

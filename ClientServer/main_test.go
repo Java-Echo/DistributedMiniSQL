@@ -1,6 +1,7 @@
 package main
 
 import (
+	masterRPC "client/rpcManager/master"
 	regionRPC "client/rpcManager/region"
 	config "client/utils/ConfigSystem"
 	mylog "client/utils/LogSystem"
@@ -14,6 +15,12 @@ import (
 func TestMain(m *testing.M) {
 	mylog.LogInputChan = mylog.LogStart()
 	config.BuildConfig()
+	var err error
+	masterRPC.RpcM2R, err = masterRPC.DialService("tcp", config.Configs.Master_ip+":"+config.Configs.Master_port)
+	if err != nil {
+		log.Fatal(err)
+	}
+	global.TableCache = make(map[string]global.TableMeta)
 	// make一下哦
 	// global.TableCache
 	// client, _ = masterRpc.DialService("tcp", "localhost:"+config.Configs.Master_port)
@@ -49,7 +56,7 @@ func Test_runOnRegion(t *testing.T) {
 		SQL:     "select * from ttt;",
 		Table:   "ttt",
 	}
-	res, err := runOnRegion(sql, "127.0.0.1")
+	res, err := runOnRegion(sql, "192.168.31.68")
 	if err != nil {
 		log.Fatal("RunOnRegion error:", err)
 	}
@@ -68,12 +75,16 @@ func Test_chooseRegionAndRun(t *testing.T) {
 
 	// tableMeta
 	meta := global.TableMeta{
-		Name:       "",
-		Master:     global.RegionInfo{IP: "127.0.0.1"},
-		Sync_slave: global.RegionInfo{IP: "127.0.0.1"},
+		Name: "ttt",
+		Master: global.RegionInfo{
+			IP: "192.168.31.68",
+		},
+		Sync_slave: global.RegionInfo{
+			IP: "192.168.31.68",
+		},
 		Slaves: []global.RegionInfo{
-			global.RegionInfo{IP: "127.0.0.1"},
-			global.RegionInfo{IP: "127.0.0.1"},
+			global.RegionInfo{IP: "192.168.31.68"},
+			global.RegionInfo{IP: "192.168.31.68"},
 		},
 	}
 
