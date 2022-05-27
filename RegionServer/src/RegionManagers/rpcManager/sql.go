@@ -49,11 +49,10 @@ func MasterSQLTableDelete(SQL SQLRst) (string, bool) {
 /*--------------常规的SQL操作--------------*/
 // 所有的SQL语句都能执行，适用于日志的读取
 func NormalSQL(sql string) string {
-	fmt.Println("将要执行的SQL语句为:" + sql + "(还没有尝试执行哦)")
-	// global.SQLInput <- sql
-	// res := <-global.SQLOutput
-	// return res
-	return ""
+	fmt.Println("执行SQL语句:" + sql)
+	global.SQLInput <- sql
+	res := <-global.SQLOutput
+	return res
 }
 
 // =======SQL的日志实现=======

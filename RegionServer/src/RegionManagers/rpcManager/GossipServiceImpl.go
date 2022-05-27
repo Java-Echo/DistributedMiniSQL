@@ -86,7 +86,7 @@ func (p *GossipService) PassTable(request PassTableRst, reply *PassTableRes) err
 	log_.LogGen(mylog.LogInputChan)
 
 	// 5. 归还写锁(其实本来是没有的)
-	meta.WriteLock <- 1
+	// meta.WriteLock <- 1
 	fmt.Println("归还写锁")
 
 	// 要不要开启一些channel之类的？
