@@ -89,7 +89,9 @@ func StartWatchTable(table *global.TableMeta) {
 				fmt.Println("该表在本地为 '" + level + "' 类型的副本")
 				fmt.Println("该表所对应的IP为 '" + ip + "' ")
 				// 首先将其加入异步从副本，然后开启一个Goroutine向其传输日志文件快照(尽可能同时完成)
+				// ToDo:这里需要加锁，然后下面的操作应该更换成同步执行
 				go passTable(ip, table.Name)
+				// ToDo:这里需要判断这个表为什么类型的副本，然后采取不同的措施
 				table.CopyRegions = append(table.CopyRegions, ip)
 				log_ := mylog.NewNormalLog("成功为表 '" + table.Name + "' 添加了一个异步从副本 '" + ip + "' ")
 				log_.LogGen(mylog.LogInputChan)
