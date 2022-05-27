@@ -114,10 +114,10 @@ func SendNewTables(tables []rpc.LocalTable) {
 			meta.TableWatcher = etcd.GetWatcher(global.Region, catalog)
 			global.TableMap[meta.Name] = meta
 			// ToDo:完善对于主副本建立监听机制
-			go StartWatchTable(meta)
+			go rpc.StartWatchTable(meta)
 			// ToDo:第一次遍历这个目录检查从副本数量，一旦数量不够，就向master索取
-			syncNeed, slaveNeed := CheckSlave(*meta)
-			GetSlave(meta.Name, syncNeed, slaveNeed)
+			syncNeed, slaveNeed := rpc.CheckSlave(*meta)
+			rpc.GetSlave(meta.Name, syncNeed, slaveNeed)
 		}
 	}
 }

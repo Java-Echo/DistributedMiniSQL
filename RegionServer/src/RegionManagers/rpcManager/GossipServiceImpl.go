@@ -58,6 +58,8 @@ func (p *GossipService) PassTable(request PassTableRst, reply *PassTableRes) err
 	meta := &global.TableMeta{}
 	meta.Name = tableName
 	meta.Level = "slave"
+	// 开启对主目录的监听
+	StartWatchMaster(meta)
 	meta.WriteLock = make(chan int, 1)
 	// 将该信息添加到本地的表中
 	global.TableMap[meta.Name] = meta
