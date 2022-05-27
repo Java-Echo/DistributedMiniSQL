@@ -71,3 +71,17 @@ func TestGossipService_PassTable(t *testing.T) {
 	t.Log("成功执行了应该，我猜的")
 	t.Error("终止")
 }
+
+func TestGossipService_SyncSQL(t *testing.T) {
+	client, err := DialGossipService("tcp", "10.162.19.119:"+config.Configs.Rpc_R2R_port)
+	if err != nil {
+		log.Fatal("dialing:", err)
+	}
+	var reply SQLRes
+	request := SQLRst{
+		SQLtype: "insert",
+		SQL:     "insert into ttt values(1);",
+		Table:   "ttt",
+	}
+	err = client.SyncSQL(request, &reply)
+}

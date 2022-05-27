@@ -101,6 +101,12 @@ func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
 		if table.SyncRegion != "" {
 			// 执行同步修改操作
 			fmt.Println("这里需要对 '" + table.SyncRegion + "' 进行同步修改")
+			client, err := DialGossipService("tcp", table.SyncRegion+":"+config.Configs.Rpc_R2R_port)
+			if err != nil {
+				log.Fatal("dialing:", err)
+			}
+			var reply SQLRes
+			err = client.SyncSQL(request, &reply)
 		}
 		// ToDo:尝试将相关信息存储到异步从副本当中
 		for _, ip := range table.CopyRegions {

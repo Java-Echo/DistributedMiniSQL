@@ -93,6 +93,11 @@ func (p *GossipService) PassTable(request PassTableRst, reply *PassTableRes) err
 	return nil
 }
 
-func (p *GossipService) SyncSQL(request SQLRst, reply SQLRes) error {
+func (p *GossipService) SyncSQL(request SQLRst, reply *SQLRes) error {
+	fmt.Println("我需要同步执行的SQL语句为:" + request.SQL)
+	res, ok := MasterSQLChange(request)
+	if ok {
+		fmt.Println("同步从副本的复制完成，结果为:" + res)
+	}
 	return nil
 }
