@@ -80,11 +80,11 @@ func Test_chooseRegionAndRun(t *testing.T) {
 			IP: "192.168.31.68",
 		},
 		Sync_slave: global.RegionInfo{
-			IP: "192.168.31.68",
+			// IP: "192.168.31.68",
 		},
 		Slaves: []global.RegionInfo{
-			global.RegionInfo{IP: "192.168.31.68"},
-			global.RegionInfo{IP: "192.168.31.68"},
+			// global.RegionInfo{IP: "192.168.31.68"},
+			// global.RegionInfo{IP: "192.168.31.68"},
 		},
 	}
 

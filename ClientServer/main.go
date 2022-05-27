@@ -32,6 +32,7 @@ func parser(input string) (regionRPC.SQLRst, bool) {
 	input = input[:len(input)-1]
 	// 分割字段
 	word := strings.Split(input, " ")
+	input += ";"
 	// 通过第一个word判断操作类型
 	if word[0] == "select" || word[0] == "insert" || word[0] == "delete" || word[0] == "update" {
 		rst.SQLtype = word[0]
@@ -107,11 +108,13 @@ func runSQL(input string) (string, error) {
 		table = global.TableCache[sqlRst.Table] // 应该是要重新赋值一下的
 		res, err := chooseRegionAndRun(sqlRst, table)
 		if err != nil {
+			log.Fatal("runSQL error:", err)
 			return "", err
 		} else {
 			// 此时终于没有问题了
 			return res, nil
 		}
+
 	} else {
 		fmt.Println("错误的SQL语句")
 		return "", fmt.Errorf("错误的SQL语句")
@@ -120,6 +123,7 @@ func runSQL(input string) (string, error) {
 
 // 尝试在当前保存的表的region信息中选择一个region服务器进行运行
 func chooseRegionAndRun(sql regionRPC.SQLRst, tableMeta global.TableMeta) (string, error) {
+	printTableMeta(tableMeta)
 	// 尝试一个个进行tableMeta进行尝试连接
 	if sql.SQLtype == "select" {
 		// 优先级①:尝试向slaves获取内容
@@ -200,4 +204,21 @@ func runOnRegion(sql regionRPC.SQLRst, clientIP string) (string, error) {
 	} else {
 		return reply.Result, nil
 	}
+}
+
+func printTableMeta(table global.TableMeta) {
+	fmt.Println("-------" + table.Name + "-------")
+	fmt.Println("table master:" + table.Master.IP)
+	fmt.Println("table sync_slave:" + table.Sync_slave.IP)
+	slaves := ""
+	for _, slave := range table.Slaves {
+		slaves += slave.IP + ","
+	}
+	fmt.Println("table slaves:" + slaves)
+	fmt.Println("-------------------")
+}
+
+func printSQL(sql regionRPC.SQLRst) {
+	fmt.Println("---------sql---------")
+	fmt.Println("sql:" + sql.SQL)
 }
