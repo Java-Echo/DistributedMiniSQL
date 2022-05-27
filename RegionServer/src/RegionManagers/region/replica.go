@@ -3,6 +3,7 @@ package regionWorker
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
 	etcd "region/etcdManager"
 	rpc "region/rpcManager"
@@ -90,11 +91,27 @@ func StartWatchTable(table *global.TableMeta) {
 				fmt.Println("该表所对应的IP为 '" + ip + "' ")
 				// 首先将其加入异步从副本，然后开启一个Goroutine向其传输日志文件快照(尽可能同时完成)
 				// ToDo:这里需要加锁，然后下面的操作应该更换成同步执行
-				go passTable(ip, table.Name)
-				// ToDo:这里需要判断这个表为什么类型的副本，然后采取不同的措施
-				table.CopyRegions = append(table.CopyRegions, ip)
-				log_ := mylog.NewNormalLog("成功为表 '" + table.Name + "' 添加了一个异步从副本 '" + ip + "' ")
-				log_.LogGen(mylog.LogInputChan)
+				// <-table.WriteLock
+				fmt.Println("尝试传递副本内容,并在对应region建立同步从副本")
+				passTable(ip, table.Name)
+				fmt.Println("副本建立完成")
+				// table.WriteLock <- 1
+
+				// 判断这个表为什么类型的副本，然后采取不同的措施
+				if level == "sync_slave" {
+					fmt.Println("服务器 '" + ip + "' 上的副本为同步从副本")
+					table.SyncRegion = ip
+					log_ := mylog.NewNormalLog("成功为表 '" + table.Name + "' 添加了一个同步从副本 '" + ip + "' ")
+					log_.LogGen(mylog.LogInputChan)
+				} else if level == "slave" {
+					fmt.Println("服务器 '" + ip + "' 上的副本为异步从副本")
+					table.CopyRegions = append(table.CopyRegions, ip)
+					log_ := mylog.NewNormalLog("成功为表 '" + table.Name + "' 添加了一个异步从副本 '" + ip + "' ")
+					log_.LogGen(mylog.LogInputChan)
+				}
+				// table.CopyRegions = append(table.CopyRegions, ip)
+				// log_ := mylog.NewNormalLog("成功为表 '" + table.Name + "' 添加了一个异步从副本 '" + ip + "' ")
+				// log_.LogGen(mylog.LogInputChan)
 				// ToDo:如果是同步从副本的指令，则需要在日志全部运行完成的时候通知本程序，然后再将其加入到同步从副本中
 			} else if event.Type == clientv3.EventTypeDelete {
 				fmt.Println("检测到表 '" + table.Name + "' 下有项目删除")
@@ -132,7 +149,7 @@ func StartWatchMaster(table *global.TableMeta) {
 		for _, event := range watchResponse.Events {
 			if event.Type == clientv3.EventTypePut {
 				newMaster := util_getKey(string(event.Kv.Key), catalog, 0)
-				fmt.Println("新成为master的节点为:" + newMaster)
+				fmt.Println("新的节点成为了表 '" + table.Name + "' 的主节点, 这个新的master的节点为:" + newMaster)
 				if newMaster == global.HostIP {
 					fmt.Println("巧了,就是我要新成为master!")
 					// 以下是在本地的表元信息映射表中，修改这张表
@@ -150,7 +167,10 @@ func StartWatchMaster(table *global.TableMeta) {
 				if oldMaster == global.HostIP {
 					fmt.Println("糟了,被抛弃的节点竟然是我自己！")
 					// ToDo:当前我们的设计是直接将被抛弃的主节点直接没了，连从副本都当不成
-					// ToDo:尚未实现这里的逻辑
+					// 以下是在本地的表元信息映射表中，修改这张表
+					delete(global.TableMap, table.Name)
+					// ToDo:
+					fmt.Println("我理应要删除本地的节点,但我还没实现这个,我准备用drop_table")
 				}
 			}
 		}
@@ -159,8 +179,11 @@ func StartWatchMaster(table *global.TableMeta) {
 
 // ToDo:得到对应的表的内容
 func getTableFile(tableName string) []byte {
-	test := "123456"
-	return []byte(test)
+	logFile, err := ioutil.ReadFile(tableName + "_log")
+	if err != nil {
+		fmt.Println("read fail", err)
+	}
+	return logFile
 }
 
 func passTable(dstIP string, tableName string) {
