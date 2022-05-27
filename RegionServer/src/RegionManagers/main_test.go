@@ -40,5 +40,8 @@ func Test_main(t *testing.T) {
 	sqlRes, _ := rpc.MasterSQLSelect(rpc.SQLRst{SQLtype: "select", SQL: "select * from " + tableName + ";"})
 	fmt.Println("sql的返回结果为:" + sqlRes)
 
+	global.SQLInput <- "quit;"
+	// res = <-global.SQLOutput
+
 	t.Error("终止")
 }
