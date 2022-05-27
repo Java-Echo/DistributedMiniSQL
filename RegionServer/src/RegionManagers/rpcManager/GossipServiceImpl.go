@@ -92,17 +92,23 @@ func (p *GossipService) PassTable(request PassTableRst, reply *PassTableRes) err
 
 	// 5. 归还写锁(其实本来是没有的)
 	// meta.WriteLock <- 1
-	fmt.Println("归还写锁")
+	// fmt.Println("归还写锁")
 
 	// 要不要开启一些channel之类的？
 	return nil
 }
 
 func (p *GossipService) SyncSQL(request SQLRst, reply *SQLRes) error {
-	fmt.Println("我需要同步执行的SQL语句为:" + request.SQL)
+	// fmt.Println("我需要同步执行的SQL语句为:" + request.SQL)
+	log_ := mylog.NewNormalLog("本地需要同步执行的SQL语句为:" + request.SQL)
+	log_.LogType = "INFO"
+	log_.LogGen(mylog.LogInputChan)
 	res, ok := MasterSQLChange(request)
 	if ok {
-		fmt.Println("同步从副本的复制完成，结果为:" + res)
+		log_ := mylog.NewNormalLog("同步从副本的复制完成，结果为:" + res)
+		log_.LogType = "INFO"
+		log_.LogGen(mylog.LogInputChan)
+		// fmt.Println("同步从副本的复制完成，结果为:" + res)
 	}
 	return nil
 }

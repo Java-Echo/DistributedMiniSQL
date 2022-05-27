@@ -102,7 +102,7 @@ func Test_chooseRegionAndRun(t *testing.T) {
 // 尚未完成测试
 func Test_runSQL(t *testing.T) {
 	// sql := "select * from cyy;"
-	sql := "insert into cyy values(6);"
+	sql := "insert into hyh values(6);"
 	res, err := runSQL(sql)
 	if err != nil {
 		log.Fatal("runSQL error:", err)

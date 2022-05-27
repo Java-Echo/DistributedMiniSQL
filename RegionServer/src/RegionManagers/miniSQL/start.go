@@ -136,10 +136,10 @@ func runShell(r chan<- error, in chan string, out chan string) {
 			// }
 			// trimInput := readBuffer()
 			// t := <-in
-			fmt.Println("before channel")
-			fmt.Println(len(in))
+			// fmt.Println("before channel")
+			// fmt.Println(len(in))
 			trimInput := <-in
-			fmt.Println("tttt")
+			// fmt.Println("tttt")
 			// trimInput := strings.TrimSpace(input) //get the input without front and backend space
 
 			//fmt.Println(trimInput)

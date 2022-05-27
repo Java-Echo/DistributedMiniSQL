@@ -1,7 +1,6 @@
 package rpc
 
 import (
-	"fmt"
 	"log"
 	"net"
 	"net/rpc"
@@ -47,9 +46,9 @@ func (p *CliService) Hello(request string, reply *string) error {
 }
 
 func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
-	fmt.Println("接受到的SQL语句为:" + request.SQL)
-	fmt.Println("SQL语句具体要作用的表为:" + request.Table)
-	fmt.Println("接受到的SQL语句的类型为:" + request.SQLtype)
+	// fmt.Println("接受到的SQL语句为:" + request.SQL)
+	// fmt.Println("SQL语句具体要作用的表为:" + request.Table)
+	// fmt.Println("接受到的SQL语句的类型为:" + request.SQLtype)
 	// 1. 首先检查本地是否有这张表
 	table, ok := global.TableMap[request.Table]
 	if !ok {
@@ -101,7 +100,10 @@ func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
 		// ToDo:尝试向同步从副本进行修改
 		if table.SyncRegion != "" {
 			// 执行同步修改操作
-			fmt.Println("这里需要对 '" + table.SyncRegion + "' 进行同步修改")
+			// fmt.Println("这里需要对 '" + table.SyncRegion + "' 进行同步修改")
+			log_ := mylog.NewNormalLog("尝试对 '" + table.SyncRegion + "' 进行同步修改")
+			log_.LogType = "INFO"
+			log_.LogGen(mylog.LogInputChan)
 			client, err := DialGossipService("tcp", table.SyncRegion+":"+config.Configs.Rpc_R2R_port)
 			if err != nil {
 				log.Fatal("dialing:", err)
@@ -111,7 +113,10 @@ func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
 		}
 		// ToDo:尝试将相关信息存储到异步从副本当中
 		for _, ip := range table.CopyRegions {
-			fmt.Println("这里需要对 '" + ip + "' 进行异步修改")
+			log_ := mylog.NewNormalLog("尝试对 '" + ip + "' 进行异步修改")
+			log_.LogType = "INFO"
+			log_.LogGen(mylog.LogInputChan)
+			// fmt.Println("这里需要对 '" + ip + "' 进行异步修改")
 			client, err := DialGossipService("tcp", ip+":"+config.Configs.Rpc_R2R_port)
 			if err != nil {
 				log.Fatal("dialing:", err)
@@ -126,7 +131,10 @@ func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
 		reply.State = "success"
 		reply.Result = ""
 		// 成功返回
-		fmt.Println("对数据表的局部改动操作完成")
+		// fmt.Println("对数据表的局部改动操作完成")
+		log_ := mylog.NewNormalLog("对数据表 '" + request.Table + "' 的局部改动操作完成")
+		log_.LogType = "INFO"
+		log_.LogGen(mylog.LogInputChan)
 		return nil
 	case "create_table":
 		// ToDo:尝试向master申请主副本
@@ -151,12 +159,12 @@ func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
 		// 首先在本地进行SQL的执行，得到执行结果
 		// 本地创建成功，尝试向master申请主副本
 
-		fmt.Println("这个操作不得了，要对数据表整体改动")
+		// fmt.Println("这个操作不得了，要对数据表整体改动")
 	default:
-		fmt.Println("什么b操作?")
+		// fmt.Println("什么b操作?")
 	}
-	reply.Result = "什么都没有查到哦"
-	reply.State = "成功"
+	reply.Result = ""
+	reply.State = "success"
 	return nil
 }
 
@@ -172,7 +180,10 @@ func SendNewTable(table LocalTable) bool {
 		meta.Level = table.Level
 		meta.Name = table.Name
 		if table.Level == "master" {
-			fmt.Println("新建的表 '" + table.Name + "' 被成功接受了")
+			// fmt.Println("新建的表 '" + table.Name + "' 被成功接受了")
+			log_ := mylog.NewNormalLog("本地尝试新建的表 '" + table.Name + "' 被master成功接受了")
+			log_.LogType = "INFO"
+			log_.LogGen(mylog.LogInputChan)
 			isAccept = true
 			// 建立这个表的其他元信息
 			catalog := config.Configs.Etcd_table_catalog + "/" + table.Name + "/"

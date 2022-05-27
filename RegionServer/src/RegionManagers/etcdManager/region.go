@@ -123,7 +123,7 @@ func GetHostAddress() string {
 			}
 		}
 	}
-	fmt.Println("怎么出来了？")
+	// fmt.Println("怎么出来了？")
 	return "127.0.0.1"
 }
 

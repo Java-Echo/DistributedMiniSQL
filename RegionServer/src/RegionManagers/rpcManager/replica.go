@@ -46,13 +46,13 @@ func GetSlave(tableName string, syncNeed int, slaveNeed int) {
 	}
 	var reply AskSlaveRes
 	RpcM2R.AskSlave(request, &reply)
-	fmt.Println("GetSlave的返回值为:" + reply.State)
+	// fmt.Println("GetSlave的返回值为:" + reply.State)
+
 }
 
 // 同步从副本的监听机制，监听的是master目录的相关变化，一旦master目录变成了自己，那么自己就需要完成相关的提升
 func StartWatchMaster(table *global.TableMeta) {
 	catalog := config.Configs.Etcd_table_catalog + "/" + table.Name + "/master/"
-	fmt.Println("监听的目录为:" + catalog)
 	watchChan := global.Region.Watch(context.Background(), catalog, clientv3.WithPrefix())
 	table.MasterWatcher = &watchChan
 	log_ := mylog.NewNormalLog("开启对表'" + table.Name + "'的master目录的监听")
@@ -62,9 +62,15 @@ func StartWatchMaster(table *global.TableMeta) {
 		for _, event := range watchResponse.Events {
 			if event.Type == clientv3.EventTypePut {
 				newMaster := util_getKey(string(event.Kv.Key), catalog, 0)
-				fmt.Println("新的节点成为了表 '" + table.Name + "' 的主节点, 这个新的master的节点为:" + newMaster)
+				// fmt.Println("新的节点成为了表 '" + table.Name + "' 的主节点, 这个新的master的节点为:" + newMaster)
+				log_ := mylog.NewNormalLog("新的节点成为了表 '" + table.Name + "' 的主节点, 这个新的master的节点为:" + newMaster)
+				log_.LogType = "INFO"
+				log_.LogGen(mylog.LogInputChan)
 				if newMaster == global.HostIP {
-					fmt.Println("巧了,就是我要新成为master!")
+					// fmt.Println("巧了,就是我要新成为master!")
+					log_ := mylog.NewNormalLog("本地节点将成为表 '" + table.Name + "' 的主节点")
+					log_.LogType = "INFO"
+					log_.LogGen(mylog.LogInputChan)
 					// 以下是在本地的表元信息映射表中，修改这张表
 					table.Level = "master"
 					catalog := config.Configs.Etcd_table_catalog + "/" + table.Name + "/"
@@ -93,7 +99,7 @@ func StartWatchMaster(table *global.TableMeta) {
 // ToDo:监听主副本在etcd上的目录的信息，根据这个目录的不同变化来做出不同的反应
 func StartWatchTable(table *global.TableMeta) {
 	catalog := config.Configs.Etcd_table_catalog + "/" + table.Name + "/"
-	fmt.Println("监听的目录为:" + catalog)
+	// fmt.Println("监听的目录为:" + catalog)
 	watchChan := global.Region.Watch(context.Background(), catalog, clientv3.WithPrefix())
 	table.TableWatcher = &watchChan
 	log_ := mylog.NewNormalLog("开启对表'" + table.Name + "'目录的监听")
@@ -112,19 +118,25 @@ func StartWatchTable(table *global.TableMeta) {
 				// 首先将其加入异步从副本，然后开启一个Goroutine向其传输日志文件快照(尽可能同时完成)
 				// ToDo:这里需要加锁，然后下面的操作应该更换成同步执行
 				// <-table.WriteLock
-				fmt.Println("尝试传递副本内容,并在对应region建立同步从副本")
+				// fmt.Println("尝试传递副本内容,并在对应region建立同步从副本")
+				log_ = mylog.NewNormalLog("尝试传递副本内容,并在对应region建立同步从副本")
+				log_.LogType = "INFO"
+				log_.LogGen(mylog.LogInputChan)
 				passTable(ip, table.Name)
-				fmt.Println("副本建立完成")
+				// fmt.Println("副本建立完成")
+				log_ = mylog.NewNormalLog("副本建立完成")
+				log_.LogType = "INFO"
+				log_.LogGen(mylog.LogInputChan)
 				// table.WriteLock <- 1
 
 				// 判断这个表为什么类型的副本，然后采取不同的措施
 				if level == "sync_slave" {
-					fmt.Println("服务器 '" + ip + "' 上的副本为同步从副本")
+					// fmt.Println("服务器 '" + ip + "' 上的副本为同步从副本")
 					table.SyncRegion = ip
 					log_ := mylog.NewNormalLog("成功为表 '" + table.Name + "' 添加了一个同步从副本 '" + ip + "' ")
 					log_.LogGen(mylog.LogInputChan)
 				} else if level == "slave" {
-					fmt.Println("服务器 '" + ip + "' 上的副本为异步从副本")
+					// fmt.Println("服务器 '" + ip + "' 上的副本为异步从副本")
 					table.CopyRegions = append(table.CopyRegions, ip)
 					log_ := mylog.NewNormalLog("成功为表 '" + table.Name + "' 添加了一个异步从副本 '" + ip + "' ")
 					log_.LogGen(mylog.LogInputChan)
@@ -178,7 +190,6 @@ func getTableFile(tableName string) []byte {
 }
 
 func passTable(dstIP string, tableName string) {
-	fmt.Println("有被调用到！")
 	client, err := DialGossipService("tcp", dstIP+":"+config.Configs.Rpc_R2R_port)
 	if err != nil {
 		log.Fatal("dialing:", err)
@@ -189,9 +200,10 @@ func passTable(dstIP string, tableName string) {
 		Content:   getTableFile(tableName),
 		TableName: tableName,
 	}
-	fmt.Println("已经做好了传输的准备")
+	// fmt.Println("尝试向服务器 '" + dstIP + "' 传送表的文件")
+	log_ := mylog.NewNormalLog("尝试向服务器 '" + dstIP + "' 传送表的文件")
+	log_.LogGen(mylog.LogInputChan)
 	err_ := client.PassTable(request, &reply)
-	fmt.Println("甚至成功返回了！")
 	if err_ != nil {
 		log.Fatal(err)
 	} else {

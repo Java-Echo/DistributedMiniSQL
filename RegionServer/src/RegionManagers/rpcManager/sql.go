@@ -65,7 +65,7 @@ func writeSQLLog(SQL SQLRst) {
 		logFile, err = os.Create(logName) //创建文件
 	} else {
 		logFile, err = os.OpenFile(logName, os.O_APPEND|os.O_WRONLY, os.ModeAppend) //打开文件
-		fmt.Println("文件存在")
+		// fmt.Println("文件存在")
 	}
 	defer logFile.Close()
 

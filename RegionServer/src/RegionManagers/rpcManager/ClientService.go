@@ -1,7 +1,6 @@
 package rpc
 
 import (
-	"fmt"
 	"net/rpc"
 	mylog "region/utils/LogSystem"
 )
@@ -18,7 +17,10 @@ var _ CliServiceInterface = (*CliServiceClient)(nil)
 func DialService(network, address string) (*CliServiceClient, error) {
 	c, err := rpc.Dial(network, address)
 	if err != nil {
-		fmt.Println("DialService没找到服务")
+		log_ := mylog.NewNormalLog("DialService没找到服务")
+		log_.LogType = "ERROR"
+		log_.LogGen(mylog.LogInputChan)
+		// fmt.Println("DialService没找到服务")
 		return nil, err
 	}
 	log_ := mylog.NewNormalLog("成功注册DialService")

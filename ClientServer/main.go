@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	masterRPC "client/rpcManager/master"
 	regionRPC "client/rpcManager/region"
 	config "client/utils/ConfigSystem"
@@ -8,6 +9,7 @@ import (
 	"client/utils/global"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 )
 
@@ -17,14 +19,29 @@ func main() {
 	global.Master.IP = config.Configs.Master_ip
 	// 注册master端的rpc服务
 	masterRPC.RpcM2R, _ = masterRPC.DialService("tcp", config.Configs.Master_ip+":"+config.Configs.Master_port)
-	// ToDo:为客户端加入一张表，用来缓存用以沟通的数据表，其中相关的rpc连接要用的时候再去连
+	// 为客户端加入一张表，用来缓存用以沟通的数据表，其中相关的rpc连接要用的时候再去连
+	global.TableCache = make(map[string]global.TableMeta)
 
+	// for {
+	// 	var sql string
+	// 	fmt.Print("sql>>>")
+	// 	fmt.Scanln(&sql)
+	// 	fmt.Println(sql)
+	// 	sql = sql[:len(sql)-2]
+	// 	res, _ := runSQL(sql)
+	// 	fmt.Println(res)
+	// }
 	for {
-		var sql string
 		fmt.Print("sql>>>")
-		fmt.Scanln(&sql)
-		res, _ := runSQL(sql)
-		fmt.Println(res)
+		fmt.Scan()
+		// 从stdin中取内容直到遇到换行符，停止
+		input, err := bufio.NewReader(os.Stdin).ReadString('\n')
+		if err != nil {
+			panic(err)
+		}
+		// fmt.Println("你输入的内容是：", strings.TrimSpace(input))
+		res, _ := runSQL(strings.TrimSpace(input))
+		fmt.Println("res>>>" + res)
 	}
 
 }

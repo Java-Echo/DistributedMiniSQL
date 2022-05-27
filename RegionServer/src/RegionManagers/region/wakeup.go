@@ -56,9 +56,12 @@ import (
 
 func findLocalTable(tableRoot string) []string {
 	var files []string
-
+	_, err := os.Stat(tableRoot)
+	if os.IsNotExist(err) {
+		return []string{}
+	}
 	root := tableRoot
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		// 不处理文件夹
 		if info.IsDir() {
 			return nil

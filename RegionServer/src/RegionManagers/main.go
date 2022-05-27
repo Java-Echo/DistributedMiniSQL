@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	etcd "region/etcdManager"
 	miniSQL "region/miniSQL"
 	regionWorker "region/region"
@@ -27,11 +26,19 @@ func main() {
 
 	// buildSQL()
 
+	// 创建数据库
+	global.SQLInput <- "create database aaa;"
+	<-global.SQLOutput
 	global.SQLInput <- "use database aaa;"
-	fmt.Println(1)
-	res := <-global.SQLOutput
-	fmt.Println(2)
-	fmt.Println(res)
+	<-global.SQLOutput
+
+	// // 新建一张表
+	// tableName := "wrd"
+	// rpc.MasterSQLTableCreate(rpc.SQLRst{SQLtype: "create_table", SQL: "create table " + tableName + "(id int);", Table: tableName})
+	// // 插入数据
+	// rpc.MasterSQLChange(rpc.SQLRst{SQLtype: "insert", SQL: "insert into " + tableName + " values(1);", Table: tableName})
+	// rpc.MasterSQLChange(rpc.SQLRst{SQLtype: "insert", SQL: "insert into " + tableName + " values(2);", Table: tableName})
+	// rpc.MasterSQLChange(rpc.SQLRst{SQLtype: "insert", SQL: "insert into " + tableName + " values(3);", Table: tableName})
 
 	// 注册rpc服务
 	rpc.RpcM2R, _ = rpc.DialReportService("tcp", global.MasterIP+":"+config.Configs.Rpc_M2R_port)

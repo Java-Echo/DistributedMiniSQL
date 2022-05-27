@@ -70,7 +70,7 @@ func (p *RegionRegisterWorker) OnPut(event *clientv3.Event) {
 }
 
 func (p *RegionRegisterWorker) OnDelete(event *clientv3.Event) {
-	fmt.Printf("Type:%s,Key:%s,Value:%s\n", event.Type, event.Kv.Key, event.Kv.Value)
+	// fmt.Printf("Type:%s,Key:%s,Value:%s\n", event.Type, event.Kv.Key, event.Kv.Value)
 	ip := util_getLastKey(string(event.Kv.Key))
 
 	log_ := mylog.NewNormalLog("服务器 " + ip + " 失去连接")
@@ -137,7 +137,7 @@ type RegionStepOutWorker struct {
 
 // ToDo:这里的逻辑是不完善的
 func (p *RegionStepOutWorker) OnPut(event *clientv3.Event) {
-	fmt.Printf("Type:%s,Key:%s,Value:%s\n", event.Type, event.Kv.Key, event.Kv.Value)
+	// fmt.Printf("Type:%s,Key:%s,Value:%s\n", event.Type, event.Kv.Key, event.Kv.Value)
 	ip := util_getLastKey(string(event.Kv.Key))
 
 	log := mylog.NewNormalLog("服务器 " + ip + " 进入“暂时失联”状态")
@@ -145,7 +145,7 @@ func (p *RegionStepOutWorker) OnPut(event *clientv3.Event) {
 }
 
 func (p *RegionStepOutWorker) OnDelete(event *clientv3.Event) {
-	fmt.Printf("Type:%s,Key:%s,Value:%s\n", event.Type, event.Kv.Key, event.Kv.Value)
+	// fmt.Printf("Type:%s,Key:%s,Value:%s\n", event.Type, event.Kv.Key, event.Kv.Value)
 	ip := util_getLastKey(string(event.Kv.Key))
 	log := mylog.NewNormalLog("服务器 " + ip + " 离开“暂时失联”状态")
 	log.LogGen(mylog.LogInputChan)

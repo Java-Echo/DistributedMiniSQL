@@ -99,14 +99,14 @@ func (p *ReportService) AskSlave(request AskSlaveRst, reply *AskSlaveRes) error 
 // ToDo:从除了source之外的region中选出n个合适的
 func selectRegion(n int, source []string) []string {
 	// 检查一下source中的表
-	fmt.Println("本地所有的表为:")
-	for ip, _ := range global.RegionMap {
-		fmt.Println(ip)
-	}
-	fmt.Println("source中的表为:")
-	for _, ip := range source {
-		fmt.Println(ip)
-	}
+	// fmt.Println("本地所有的表为:")
+	// for ip, _ := range global.RegionMap {
+	// 	fmt.Println(ip)
+	// }
+	// fmt.Println("source中的表为:")
+	// for _, ip := range source {
+	// 	fmt.Println(ip)
+	// }
 
 	// 真正开始找表的地方
 	res := make([]string, 0)
@@ -127,8 +127,8 @@ func selectRegion(n int, source []string) []string {
 			num++
 		}
 	}
-	fmt.Print("我们选定的表为:")
-	fmt.Println(res)
+	// fmt.Print("我们选定的表为:")
+	// fmt.Println(res)
 	return res
 }
 
