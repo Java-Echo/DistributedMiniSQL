@@ -1,6 +1,0 @@
-drop table bbb;
-create table bbb(id int);
-insert into bbb values(1);
-insert into bbb values(2);
-insert into bbb values(3);
-insert into bbb values(6);

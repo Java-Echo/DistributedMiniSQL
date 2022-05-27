@@ -1,4 +1,4 @@
-  etcd_ip: 192.168.84.80 # 当前的etcd的ip地址！
+  etcd_ip: 192.168.43.124 # 当前的etcd的ip地址！
   etcd_port: 2379
   etcd_region_register_catalog: /server #需要完成注册的位置
   etcd_master_address: /config/masterAddress #Master的地址
