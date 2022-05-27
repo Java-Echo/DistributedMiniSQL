@@ -1,0 +1,3 @@
+drop table ttt;
+create table ttt(id int);
+insert into ttt values(3);

@@ -1,7 +1,9 @@
 package rpc
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/rpc"
@@ -56,28 +58,27 @@ func (p *GossipService) PassTable(request PassTableRst, reply *PassTableRes) err
 	meta := &global.TableMeta{}
 	meta.Name = tableName
 	meta.Level = "slave"
-	meta.WriteLock = make(chan int)
+	meta.WriteLock = make(chan int, 1)
 
 	// 2. 首先接受整个表文件
-	file, err := os.Create(tableName + "_log11")
+	file, err := os.Create(tableName + "_log")
 	if err != nil {
 		log.Fatal("创建文件失败")
 	}
-	defer func() {
-		file.Close()
-	}()
 	file.Write(request.Content)
+	file.Close()
 
 	// 3. 尝试逐行读取其中的命令，然后执行SQL
-	// br := bufio.NewReader(file)
-	// for {
-	// 	sqlLine, _, c := br.ReadLine()
-	// 	if c == io.EOF {
-	// 		break
-	// 	}
-	// 	fmt.Println(string(sqlLine))
-	// 	// NormalSQL(string(sqlLine))
-	// }
+	fi, err := os.Open(tableName + "_log")
+	defer fi.Close()
+	br := bufio.NewReader(fi)
+	for {
+		sqlLine, _, c := br.ReadLine()
+		if c == io.EOF {
+			break
+		}
+		NormalSQL(string(sqlLine))
+	}
 	// 4. 创建成功
 	log_ := mylog.NewNormalLog("创建表 '" + tableName + "' 的备份成功")
 	log_.LogType = "INFO"
