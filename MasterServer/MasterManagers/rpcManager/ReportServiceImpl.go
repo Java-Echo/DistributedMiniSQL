@@ -36,6 +36,7 @@ func StartReportService(port string) {
 }
 
 // ToDo:将得到的表的名字存储在本地的map当中
+// ToDo:这里的逻辑需要重构
 func (p *ReportService) ReportTable(request []LocalTable, reply *ReportTableRes) error {
 	// 检查：是否已经存在同名表
 	for _, t := range request {

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	miniSQL "region/miniSQL"
+	rpc "region/rpcManager"
 	config "region/utils/ConfigSystem"
 	mylog "region/utils/LogSystem"
 	"region/utils/global"
@@ -16,28 +17,24 @@ func Test_main(t *testing.T) {
 	global.SQLInput = make(chan string)
 	global.SQLOutput = make(chan string)
 	go miniSQL.Start(global.SQLInput, global.SQLOutput)
-	// global.SQLInput <- "create database aaa;"
-	// res := <-global.SQLOutput
-	// fmt.Println(res)
-	fmt.Println("xyz")
-	global.SQLInput <- "use database aaa;"
+
+	// 创建数据库
+	global.SQLInput <- "create database aaa;"
 	res := <-global.SQLOutput
 	fmt.Println(res)
-	// global.SQLInput <- "create table ttt(id int);"
-	// res = <-global.SQLOutput
-	// fmt.Println(res)
-	global.SQLInput <- "insert into ttt values(1);"
+	// 使用数据库
+	global.SQLInput <- "use database aaa;"
 	res = <-global.SQLOutput
 	fmt.Println(res)
-	global.SQLInput <- "insert into ttt values(2);"
-	res = <-global.SQLOutput
-	fmt.Println(res)
-	global.SQLInput <- "insert into ttt values(3);"
-	res = <-global.SQLOutput
-	fmt.Println(res)
-	global.SQLInput <- "select * from ttt;"
-	res = <-global.SQLOutput
-	fmt.Println("select的查询结果为:" + res)
+
+	// 创建数据表
+	tableName := "ttt"
+	// tableName := "bbb"
+	rpc.MasterSQLTableCreate(rpc.SQLRst{SQLtype: "create_table", SQL: "create table " + tableName + "(id int);", Table: tableName})
+	// 插入数据
+	rpc.MasterSQLChange(rpc.SQLRst{SQLtype: "insert", SQL: "insert into " + tableName + " values(1);", Table: tableName})
+	rpc.MasterSQLChange(rpc.SQLRst{SQLtype: "insert", SQL: "insert into " + tableName + " values(2);", Table: tableName})
+	rpc.MasterSQLChange(rpc.SQLRst{SQLtype: "insert", SQL: "insert into " + tableName + " values(3);", Table: tableName})
 
 	t.Error("终止")
 }

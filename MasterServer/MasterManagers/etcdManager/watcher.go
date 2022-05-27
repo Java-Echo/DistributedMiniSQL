@@ -154,7 +154,7 @@ func (p *RegionStepOutWorker) OnDelete(event *clientv3.Event) {
 	if regionMeta.State == global.Stop {
 		log := mylog.NewNormalLog("服务器 " + ip + " 完全失去联系, 正在尝试清除它的一切")
 		log.LogGen(mylog.LogInputChan)
-		// 从全局的region服务器表中删除
+		// 从全局的region服务器表中删除(在这之前我们已经将其从全部的表中删除了)
 		delete(global.RegionMap, regionMeta.IP)
 	} else if regionMeta.State == global.Working {
 		log := mylog.NewNormalLog("服务器 " + ip + " 宕机重启成功")
