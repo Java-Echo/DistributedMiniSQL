@@ -182,6 +182,7 @@ func chooseRegionAndRun(sql regionRPC.SQLRst, tableMeta global.TableMeta) (strin
 // 尝试堆特定的IP地址进行特定的访问(已测试)
 func runOnRegion(sql regionRPC.SQLRst, clientIP string) (string, error) {
 	// 尝试联络
+	fmt.Println("尝试连接服务器:" + clientIP)
 	client, err := regionRPC.DialService("tcp", clientIP+":"+config.Configs.Region_port)
 	if err != nil {
 		return "", err
