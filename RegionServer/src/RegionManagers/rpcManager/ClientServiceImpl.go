@@ -63,7 +63,7 @@ func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
 	case "select":
 		// 检查这张表的版本是否有问题(暂时先不做)
 		// 调用sql的查询
-		res, success := SQLSelect(request.SQL)
+		res, success := SQLSelect(request)
 		reply.Result = res
 		if success {
 			reply.State = "success"
@@ -86,7 +86,7 @@ func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
 			return nil
 		}
 		// 尝试在本地完成修改
-		_, ok := MasterSQLChange(request.SQL)
+		_, ok := MasterSQLChange(request)
 		if ok {
 			log_ := mylog.NewNormalLog("执行SQL语句 '" + request.SQL + "' 成功")
 			log_.LogType = "INFO"
@@ -115,7 +115,7 @@ func (p *CliService) SQL(request SQLRst, reply *SQLRes) error {
 		// ToDo:尝试向master申请主副本
 
 		// 如果master成功返回，则在在本地进行SQL的执行，得到执行结果
-		res, success := MasterSQLTableCreate(request.SQL)
+		res, success := MasterSQLTableCreate(request)
 		reply.Result = res
 		if success {
 			reply.State = "success"

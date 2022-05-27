@@ -25,6 +25,7 @@ func TestMain(m *testing.M) {
 	// global.TableCache
 	// client, _ = masterRpc.DialService("tcp", "localhost:"+config.Configs.Master_port)
 	m.Run()
+
 }
 
 func Test_parser(t *testing.T) {
@@ -101,6 +102,7 @@ func Test_chooseRegionAndRun(t *testing.T) {
 // 尚未完成测试
 func Test_runSQL(t *testing.T) {
 	sql := "select * from ttt;"
+	// sql := "insert into ttt values(3);"
 	res, err := runSQL(sql)
 	if err != nil {
 		log.Fatal("runSQL error:", err)

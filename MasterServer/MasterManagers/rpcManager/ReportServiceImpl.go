@@ -42,6 +42,7 @@ func (p *ReportService) ReportTable(request []LocalTable, reply *ReportTableRes)
 		if _, ok := global.TableMap[t.Name]; ok {
 			// 此时检测到同名表
 			// ToDo:这里得返回错误信息，错误系统我尚未建立
+			fmt.Println("已经有个重复的表！")
 			return nil
 		}
 	}

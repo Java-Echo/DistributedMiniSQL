@@ -29,6 +29,12 @@ func Test_main(t *testing.T) {
 	global.SQLInput <- "insert into ttt values(1);"
 	res = <-global.SQLOutput
 	fmt.Println(res)
+	global.SQLInput <- "insert into ttt values(2);"
+	res = <-global.SQLOutput
+	fmt.Println(res)
+	global.SQLInput <- "insert into ttt values(3);"
+	res = <-global.SQLOutput
+	fmt.Println(res)
 	global.SQLInput <- "select * from ttt;"
 	res = <-global.SQLOutput
 	fmt.Println("select的查询结果为:" + res)

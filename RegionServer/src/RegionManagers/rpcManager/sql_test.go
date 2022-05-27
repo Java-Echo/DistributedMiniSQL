@@ -30,7 +30,12 @@ func TestMain(m *testing.M) {
 }
 
 func TestMasterSQLSelect(t *testing.T) {
-	sql := "select * from ttt;"
+	// sql := "select * from ttt;"
+	sql := SQLRst{
+		SQLtype: "select",
+		SQL:     "select * from ttt;",
+		Table:   "ttt",
+	}
 	res, ok := MasterSQLSelect(sql)
 	if ok {
 		fmt.Println("查询结果为:" + res)
@@ -40,7 +45,11 @@ func TestMasterSQLSelect(t *testing.T) {
 }
 
 func TestMasterSQLTableCreate(t *testing.T) {
-	sql := "create table ttt(id int);"
+	sql := SQLRst{
+		SQLtype: "create_table",
+		SQL:     "create table ttt(id int);",
+		Table:   "ttt",
+	}
 	res, ok := MasterSQLTableCreate(sql)
 	if ok {
 		fmt.Println("表的创建结果为:" + res)
@@ -50,7 +59,12 @@ func TestMasterSQLTableCreate(t *testing.T) {
 }
 
 func TestMasterSQLChange(t *testing.T) {
-	sql := "insert into ttt values(3);"
+	// sql := "insert into ttt values(3);"
+	sql := SQLRst{
+		SQLtype: "insert",
+		SQL:     "insert into ttt values(3);",
+		Table:   "ttt",
+	}
 	res, ok := MasterSQLTableCreate(sql)
 	if ok {
 		fmt.Println("表项插入的结果为:" + res)
